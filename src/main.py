@@ -29,7 +29,7 @@ bot = Bot(API_TOKEN)
 @bot.on.message
 def send_greetings(answer: Message):
     if not Users.contains(answer.chat_id):
-        keyboard = utils.create_keyboard('Добавить группу', 'Выбрать общежитие')
+        keyboard = utils.create_keyboard('Добавить группу', 'Выбрать общежитие', 'Где трамваи?')
         answer(messages.hello, keyboard=keyboard.generate())
 
         # запоминает id пользователя; если его нет в базе, добавляется
@@ -45,6 +45,12 @@ def suggest_dorms(answer: Message):
 @bot.on.message(text=['Умельцев', 'Щорса'])
 def remember_dorm(answer: Message):
     Users.update_dorm(answer.chat_id, answer.text)
+
+
+@bot.on.message(text=['Где трамваи?'])
+def show_trolleys(answer: Message):
+    keyboard = utils.create_keyboard('Обновить данные', 'Покажи главное меню')
+    answer(messages.trolleys, keyboard=keyboard.generate())
 
 
 if __name__ == '__main__':
