@@ -20,3 +20,7 @@ class Users:
     @staticmethod
     def update_full_name(id, full_name):
         pass
+
+    @staticmethod
+    def update_dom(id, new_dom):
+        pass

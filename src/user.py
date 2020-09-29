@@ -5,6 +5,7 @@ class User:
     def __init__(self):
         self._id = None
         self._full_name = None
+        self._dom = None
 
     @property
     def id(self):
@@ -22,4 +23,15 @@ class User:
 
     @full_name.setter
     def full_name(self, new_full_name):
+        # проверить, если имя не соответсвует имени в базе
         Users.update_full_name(self.id, new_full_name)
+
+    @property
+    def dom(self):
+        return self._dom
+
+    @dom.setter
+    def dom(self, new_dom):
+        # проверить, если имя не соответсвует имени в базе
+        Users.update_dom(self.id, new_dom)
+
