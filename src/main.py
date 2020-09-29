@@ -1,20 +1,16 @@
 # -*- coding: utf-8 -*-
-import vk_api
-from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
-from vk_api.keyboard import VkKeyboard, VkKeyboardColor
-from vk_api.utils import get_random_id
 
+from vkbottle import Bot, Message
+
+from src import messages, utils
 from src.db import Users
 from src.user import User
 
 user = User()
 
 API_TOKEN = "***REMOVED***"
-API_VERSION = "5.131"
 
-vk_session = vk_api.VkApi(token=API_TOKEN, api_version=API_VERSION)
-api = vk_session.get_api()
-longpoll = VkBotLongPoll(vk_session, group_id='184750146')
+bot = Bot(API_TOKEN)
 
 
 # добавление пользователя в базу данных
@@ -30,37 +26,15 @@ longpoll = VkBotLongPoll(vk_session, group_id='184750146')
 # кто хочет сходить в магазин?
 # объявления от пользователей(?)
 
-def send_greetings(event):
-    api.messages.send(user_id=event.message.from_id,
-                      message="Привет, добро пожаловать! Обращайся ко мне, если нужно узнать расписание в "
-                              "твоей группе, расписание трамваев и метро, твой рейтинг на портале или дать "
-                              "объявление, которое увидят все пользователи",
-                      keyboard=create_general_keyboard(),
-                      random_id=get_random_id())
+@bot.on.message
+def send_greetings(answer: Message):
+    if not Users.contains(answer.chat_id):
+        keyboard = utils.create_main_keyboard()
+        answer(messages.hello, keyboard=keyboard.generate())
 
-
-def main():
-    for event in longpoll.listen():
-        if event.type == VkBotEventType.MESSAGE_NEW:
-            if not Users.contains(event.message.from_id):
-                send_greetings(event)
-
-            # запоминает id пользователя; если его нет в базе, добавляется
-            user.id = event.message.from_id
-
-
-def create_general_keyboard():
-    _keyboard = VkKeyboard(one_time=True)
-
-    _keyboard.add_button('Добавить группу', color=VkKeyboardColor.SECONDARY)
-    _keyboard.add_button('Зелёная кнопка', color=VkKeyboardColor.POSITIVE)
-    _keyboard.add_button('Зелёная кнопка', color=VkKeyboardColor.POSITIVE)
-
-    _keyboard.add_line()  # Переход на вторую строку
-    _keyboard.add_location_button()
-
-    return _keyboard.get_keyboard()
+        # запоминает id пользователя; если его нет в базе, добавляется
+        user.id = answer.chat_id
 
 
 if __name__ == '__main__':
-    main()
+    bot.run_polling()
