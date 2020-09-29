@@ -1,6 +1,10 @@
 # mysql
 PyMySQL==0.10.1
 
+# parsing
+lxml==4.5.2
+requests==2.24.0
+
 # vk bot api
 vkbottle==2.7.12
 
