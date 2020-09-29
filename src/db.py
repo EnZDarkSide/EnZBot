@@ -22,5 +22,5 @@ class Users:
         pass
 
     @staticmethod
-    def update_dom(id, new_dom):
+    def update_dorm(id, new_dom):
         pass

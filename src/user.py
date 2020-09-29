@@ -27,11 +27,10 @@ class User:
         Users.update_full_name(self.id, new_full_name)
 
     @property
-    def dom(self):
+    def dorm(self):
         return self._dom
 
-    @dom.setter
-    def dom(self, new_dom):
+    @dorm.setter
+    def dorm(self, new_dom):
         # проверить, если имя не соответсвует имени в базе
-        Users.update_dom(self.id, new_dom)
-
+        Users.update_dorm(self.id, new_dom)

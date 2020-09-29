@@ -29,11 +29,22 @@ bot = Bot(API_TOKEN)
 @bot.on.message
 def send_greetings(answer: Message):
     if not Users.contains(answer.chat_id):
-        keyboard = utils.create_main_keyboard()
+        keyboard = utils.create_keyboard('Добавить группу', 'Выбрать общежитие')
         answer(messages.hello, keyboard=keyboard.generate())
 
         # запоминает id пользователя; если его нет в базе, добавляется
         user.id = answer.chat_id
+
+
+@bot.on.message(text=['Выбрать общежитие'])
+def suggest_dorms(answer: Message):
+    keyboard = utils.create_keyboard('Умельцев', 'Щорса')
+    answer(messages.dorm_choice, keyboard=keyboard.generate())
+
+
+@bot.on.message(text=['Умельцев', 'Щорса'])
+def remember_dorm(answer: Message):
+    Users.update_dorm(answer.chat_id, answer.text)
 
 
 if __name__ == '__main__':
