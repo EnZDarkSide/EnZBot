@@ -1,7 +1,7 @@
 import pymysql
 
-con = pymysql.connect('localhost', 'root',
-                      '', 'enzbotdb')
+con = pymysql.connect('sql7.freesqldatabase.com', 'sql7369933',
+                      'xWUCnPAEmW', 'sql7369933')
 
 cur = con.cursor()
 
