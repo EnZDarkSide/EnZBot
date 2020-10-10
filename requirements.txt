@@ -10,5 +10,4 @@ vkbottle==2.7.12
 
 # зависимости vkbottle
 loguru==0.5.3
-uvloop==0.14.0
 ujson==3.2.0

@@ -1,2 +1,4 @@
 .idea
 venv
+__pycache__/main.cpython-38.pyc
+src/__pycache__/
