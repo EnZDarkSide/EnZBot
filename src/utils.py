@@ -1,11 +1,16 @@
+from typing import Tuple, List
+
+from vkbottle import keyboard_gen
 from vkbottle.keyboard import Keyboard, Text
 
 
-def create_keyboard(*buttons):
-    keyboard = Keyboard(one_time=True)
-
-    for button in buttons:
-        keyboard.add_row()
-        keyboard.add_button(Text(label=button), color="primary")
-
+def create_keyboard(*rows: List[dict]):
+    keyboard = keyboard_gen(
+        [
+            [{"text": button["text"],
+              "color": button["color"] if "color" in button else "primary",
+              "type": button["type"] if "type" in button else "text"} for button in row]
+            for row in rows
+        ]
+    )
     return keyboard

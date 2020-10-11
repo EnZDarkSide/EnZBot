@@ -1,9 +1,9 @@
 import pymysql
 
-from src.connection import get_global_con
+from src.connection import get_global_con, get_local_con
 
-# con = get_local_con()
-con = get_global_con()
+con = get_local_con()
+# con = get_global_con()
 
 cur = con.cursor()
 

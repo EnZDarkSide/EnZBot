@@ -25,31 +25,28 @@ bot = Bot(API_TOKEN)
 # объявления от пользователей(?)
 
 
+def general_menu():
+    return utils.create_keyboard([{"text": "Добавить группу"}, {"text": 'Указать адрес'}], [{"text": "Где трамваи?"}])
+
+
 @bot.on.event.message_allow()
-@bot.on.event.group_join()
-async def send_greetings(event: MessageAllow or GroupJoin):
+async def send_greetings(event: MessageAllow):
+    user = await bot.api.users.get(user_ids=[event.user_id])
+
+    await bot.api.messages.send(
+        user_id=event.user_id,
+        keyboard=general_menu(),
+        message=messages.send_greetings(user[0].sex),
+        random_id=bot.extension.random_id()
+    )
+
     if not Users.contains(event.user_id):
-        await bot.api.messages.send(
-            peer_id=event.user_id,
-            message=messages.hello,
-            keyboard=utils.create_keyboard('Добавить группу', 'Указать адрес', 'Где трамваи?'),
-            random_id=bot.extension.random_id()
-        )
-
-        await send_default_keyboard()
-
-        user = await bot.api.users.get(user_ids=[event.user_id])
         Users.add(event.user_id, f'{user[0].first_name} {user[0].last_name}')
 
 
-@bot.on.message(text=['Меню'])
-async def send_default_keyboard(answer: Message):
-    await bot.api.messages.send(
-        peer_id=answer.peer_id,
-        message="Призываем меню",
-        keyboard=utils.create_keyboard('Добавить группу', 'Указать адрес', 'Где трамваи?'),
-        random_id=bot.extension.random_id()
-    )
+@bot.on.message(text=['Меню', 'Главное меню'])
+async def send_menu(answer: Message):
+    await answer(message='Призываем меню!', keyboard=general_menu())
 
 
 @bot.on.message(text=['Добавить себя'])
@@ -62,24 +59,33 @@ async def add_user(answer: Message):
 
 
 @bot.on.message(text=['Указать адрес'])
-async def suggest_dorms(answer: Message):
+async def updating_address_start(answer: Message):
     await answer("Укажите свой адрес")
-    await bot.branch.add(answer.peer_id, "address_branch")
+    await bot.branch.add(answer.peer_id, "updating_address")
 
 
-@bot.branch.simple_branch("address_branch")
+@bot.branch.simple_branch("updating_address")
 async def update_address(answer: Message):
-    if Users.update_address(answer.from_id, answer.text):
-        await answer("Готово! Данные занесены в базу")
-        await send_default_keyboard(answer)
+    if not Users.update_address(answer.from_id, answer.text):
+        await answer(messages.error, general_menu())
+
+    await answer("Готово! Данные занесены в базу", general_menu())
 
     await bot.branch.exit(answer.peer_id)
 
 
 @bot.on.message(text=['Где трамваи?'])
 async def show_trolleys(answer: Message):
-    keyboard = utils.create_keyboard('Обновить данные', 'Покажи главное меню')
-    await answer(messages.trolleys, keyboard=keyboard.generate())
+    keyboard = utils.create_keyboard([{"text": 'Обновить данные'}, {"text": 'Указать адрес'}],
+                                     [{"text": 'Главное меню', "color": "secondary"}])
+    await answer(messages.trolleys, keyboard=keyboard)
+
+
+@bot.on.message(text=['Обновить данные'])
+async def show_trolleys(answer: Message):
+    keyboard = utils.create_keyboard([{"text": 'Обновить данные'}, {"text": 'Указать адрес'}],
+                                     [{"text": 'Главное меню', "color": "secondary"}])
+    await answer(messages.trolleys, keyboard=keyboard)
 
 
 if __name__ == '__main__':
