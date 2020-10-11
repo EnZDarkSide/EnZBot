@@ -1,5 +1,3 @@
-import pymysql
-
 from src.connection import get_global_con, get_local_con
 
 con = get_local_con()
@@ -19,11 +17,6 @@ class Users:
     def contains(user_id):
         Users.exec_command(f'SELECT * FROM users WHERE UserId={user_id}', False)
         return cur.fetchone()
-
-    @staticmethod
-    def add(user_id):
-        command = f"INSERT INTO users(UserId) VALUES ({user_id})"
-        return Users.exec_command(command)
 
     @staticmethod
     def add(user_id, full_name):

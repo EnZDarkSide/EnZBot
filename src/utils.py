@@ -11,6 +11,10 @@ def trolleys_menu():
                            [{"text": 'Главное меню', "color": "secondary"}])
 
 
+def address_menu():
+    return create_keyboard([{"text": 'Назад'}])
+
+
 def create_keyboard(*rows: List[dict]):
     keyboard = keyboard_gen(
         [
