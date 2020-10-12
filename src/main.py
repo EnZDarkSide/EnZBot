@@ -44,7 +44,7 @@ async def send_greetings(answer: Message):
 
 @bot.on.message(text=['Меню', 'Главное меню', '?'])
 async def send_menu(answer: Message):
-    await answer(message='Призываем меню!', keyboard=utils.general_menu())
+    await answer(message=messages.getting_menu, keyboard=utils.general_menu())
 
 
 @bot.on.message(text=['Добавить себя'])
@@ -65,12 +65,17 @@ async def updating_address_start(answer: Message):
 @bot.branch.simple_branch("updating_address")
 async def update_address(answer: Message):
     if str.lower(answer.text) not in ['назад', 'выйти', 'главное меню', 'меню']:
-        if not Users.update_address(answer.from_id, answer.text):
-            await answer(messages.error, keyboard=general_menu())
-            return
+        if Users.update_address(answer.from_id, answer.text):
+            msg = messages.done
+        else:
+            msg = messages.error
+    # пользователь вызывает меню,
+    # поэтому сообщение о добалвенных данных показывать не надо
+    else:
+        msg = messages.getting_menu
 
     await bot.branch.exit(answer.peer_id)
-    await answer("Готово! Данные занесены в базу", keyboard=general_menu())
+    await answer(msg, keyboard=general_menu())
 
 
 @bot.on.message(text=['Где трамваи?'])
