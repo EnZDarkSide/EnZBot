@@ -2,7 +2,7 @@ import pymysql
 
 
 def get_local_con():
-    return pymysql.connect('localhost', 'root', '', 'enzbotdb')
+    return pymysql.connect('localhost', 'enzbot', 'password', 'enzbotdb')
 
 
 def get_global_con():
