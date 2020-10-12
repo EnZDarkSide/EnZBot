@@ -44,13 +44,13 @@ async def send_greetings(answer: Message):
 
 @bot.on.message(text=['Меню', 'Главное меню', '?'])
 async def send_menu(answer: Message):
-    await answer(message=messages.getting_menu, keyboard=utils.general_menu())
+    await answer(message=messages.about_to_show_menu, keyboard=utils.general_menu())
 
 
 @bot.on.message(text=['Добавить себя'])
 async def add_user(answer: Message):
     if not Users.add(answer.peer_id):
-        await answer("Возникла ошибка. Попробуй позже", keyboard=general_menu())
+        await answer(messages.error, keyboard=general_menu())
         return
 
     await answer("Готово")
@@ -58,7 +58,7 @@ async def add_user(answer: Message):
 
 @bot.on.message(text=['Указать адрес'])
 async def updating_address_start(answer: Message):
-    await answer("Укажите свой адрес")
+    await answer(messages.getting_address)
     await move_to_branch(answer.peer_id, "updating_address")
 
 
@@ -72,7 +72,7 @@ async def update_address(answer: Message):
     # пользователь вызывает меню,
     # поэтому сообщение о добалвенных данных показывать не надо
     else:
-        msg = messages.getting_menu
+        msg = messages.about_to_show_menu
 
     await bot.branch.exit(answer.peer_id)
     await answer(msg, keyboard=general_menu())
