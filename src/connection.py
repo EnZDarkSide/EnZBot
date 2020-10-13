@@ -1,4 +1,5 @@
 import pymysql
+import json
 
 
 def get_local_con():
@@ -6,4 +7,6 @@ def get_local_con():
 
 
 def get_global_con():
-    return pymysql.connect('VH282.spaceweb.ru', 'enzdarksid', 'cRM6JRT1Bobx', 'enzdarksid')
+    with open('settings.json') as connections_file:
+        connection = json.load(connections_file)
+    return pymysql.connect(connection['host'], connection['login'], connection['pass'], connection['database'])
