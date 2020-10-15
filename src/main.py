@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
-
-from vkbottle import Bot, Message
+from vkbottle import Message
+from src.bot import bot
 
 from src import messages, utils
 from src.db import Users
 from src.utils import trolleys_menu, general_menu
-
-API_TOKEN = "***REMOVED***"
-
-bot = Bot(API_TOKEN)
 
 
 # добавление пользователя в базу данных
@@ -47,13 +43,13 @@ async def send_menu(answer: Message):
     await answer(message=messages.about_to_show_menu, keyboard=utils.general_menu())
 
 
-@bot.on.message(text=['Добавить себя'])
-async def add_user(answer: Message):
-    if not Users.add(answer.peer_id):
-        await answer(messages.error, keyboard=general_menu())
-        return
-
-    await answer("Готово")
+# @bot.on.message(text=['Добавить себя'])
+# async def add_user(answer: Message):
+#     if not Users.add(answer.peer_id):
+#         await answer(messages.error, keyboard=general_menu())
+#         return
+#
+#     await answer("Готово")
 
 
 @bot.on.message(text=['Указать адрес'])
@@ -99,6 +95,7 @@ async def show_trolleys(answer: Message):
 async def move_to_branch(peer_id: int, branch_name: str):
     await bot.branch.exit(peer_id)
     await bot.branch.add(peer_id, branch_name)
+
 
 if __name__ == '__main__':
     bot.run_polling()
