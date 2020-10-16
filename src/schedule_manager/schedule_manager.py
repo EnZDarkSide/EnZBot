@@ -11,6 +11,3 @@ class ScheduleManager:
         self.schedules = {
             "УрГЭУ": ScheduleUSUE()
         }
-
-
-

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from vkbottle import Message
-from src.bot import bot
 
 from src import messages, utils
+from src.bot import bot
 from src.db import Users
 from src.utils import trolleys_menu, general_menu
 
@@ -19,23 +19,6 @@ from src.utils import trolleys_menu, general_menu
 # настройки
 # кто хочет сходить в магазин?
 # объявления от пользователей(?)
-
-
-@bot.on.message(text=['Начать'])
-async def send_greetings(answer: Message):
-    await bot.branch.exit(answer.peer_id)
-
-    user = await bot.api.users.get(user_ids=[answer.from_id])
-
-    await bot.api.messages.send(
-        user_id=answer.from_id,
-        keyboard=general_menu(),
-        message=messages.send_greetings(user[0].sex),
-        random_id=bot.extension.random_id()
-    )
-
-    if not Users.contains(answer.from_id):
-        Users.add(answer.from_id, f'{user[0].first_name} {user[0].last_name}')
 
 
 @bot.on.message(text=['Меню', 'Главное меню', '?'])
@@ -90,6 +73,24 @@ async def show_trolleys(answer: Message):
         return
 
     await answer(messages.trolleys_available, keyboard=trolleys_menu())
+
+
+@bot.on.message()
+@bot.on.message(text=['Начать'])
+async def send_greetings(answer: Message):
+    await bot.branch.exit(answer.peer_id)
+
+    user = await bot.api.users.get(user_ids=[answer.from_id])
+
+    await bot.api.messages.send(
+        user_id=answer.from_id,
+        keyboard=general_menu(),
+        message=messages.send_greetings(user[0].sex),
+        random_id=bot.extension.random_id()
+    )
+
+    if not Users.contains(answer.from_id):
+        Users.add(answer.from_id, f'{user[0].first_name} {user[0].last_name}')
 
 
 async def move_to_branch(peer_id: int, branch_name: str):

@@ -1,5 +1,6 @@
-import pymysql
 import json
+
+import pymysql
 
 
 def get_local_con():

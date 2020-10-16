@@ -1,8 +1,8 @@
 from dataclasses import dataclass
-
-from lxml import html
-import requests
 from typing import List
+
+import requests
+from lxml import html
 
 
 @dataclass
