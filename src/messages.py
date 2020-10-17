@@ -4,6 +4,8 @@ error = 'Видимо, произошла какая-то ошибка. Попр
 done = 'Готово! Данные занесены в базу'
 about_to_show_menu = 'Призываем меню!'
 getting_address = 'Укажите свой адрес'
+getting_home_trolley_stop = 'С какой остановки ты ездишь в универ?'
+getting_university_trolley_stop = 'На какой остановке выходишь?'
 
 
 def send_greetings(sex: bool):

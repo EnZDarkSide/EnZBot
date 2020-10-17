@@ -48,3 +48,11 @@ class Users:
         except Exception as e:
             print(e)
             return False
+
+    @staticmethod
+    def set_home_trolley_stop(stop):
+        pass
+
+    @staticmethod
+    def set_university_trolley_stop(stop):
+        pass

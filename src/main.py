@@ -5,6 +5,7 @@ from src import messages, utils
 from src.bot import bot
 from src.db import Users
 from src.utils import trolleys_menu, general_menu
+from src.parser.transport import Transport
 
 
 # добавление пользователя в базу данных
@@ -30,7 +31,7 @@ async def send_menu(answer: Message):
 # async def add_user(answer: Message):
 #     if not Users.add(answer.peer_id):
 #         await answer(messages.error, keyboard=general_menu())
-#         return
+#         return/error
 #
 #     await answer("Готово")
 
@@ -55,6 +56,36 @@ async def update_address(answer: Message):
 
     await bot.branch.exit(answer.peer_id)
     await answer(msg, keyboard=general_menu())
+
+
+@bot.on.message(text=['Указать трамвайные остановки'])
+async def start_setting_trolley_stops(answer: Message):
+    await answer(messages.getting_home_trolley_stop)
+    await move_to_branch(answer.peer_id, 'setting_home_trolley_stop')
+
+
+@bot.branch.simple_branch('setting_home_trolley_stop')
+async def set_home_trolley_stop(answer: Message):
+    if Transport.stop_exists(answer.text.lower()):
+        Users.set_home_trolley_stop(answer.text)
+        msg = messages.getting_university_trolley_stop
+        await move_to_branch(answer.peer_id, 'setting_university_trolley_stop')
+    else:
+        msg = messages.error
+
+    await answer(msg)
+
+
+@bot.branch.simple_branch('setting_university_trolley_stop')
+async def set_university_trolley_stop(answer: Message):
+    if Transport.stop_exists(answer.text.lower()):
+        Users.set_university_trolley_stop(answer.text)
+        msg = messages.done
+        bot.branch.exit(answer.peer_id)
+    else:
+        msg = messages.error
+
+    await answer(msg)
 
 
 @bot.on.message(text=['Где трамваи?'])
