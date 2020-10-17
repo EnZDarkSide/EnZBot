@@ -31,7 +31,7 @@ async def send_menu(answer: Message):
 # async def add_user(answer: Message):
 #     if not Users.add(answer.peer_id):
 #         await answer(messages.error, keyboard=general_menu())
-#         return/error
+#         return
 #
 #     await answer("Готово")
 
