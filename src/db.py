@@ -50,9 +50,13 @@ class Users:
             return False
 
     @staticmethod
-    def set_home_trolley_stop(stop):
-        pass
+    def set_home_trolley_stop(user_id, stop):
+        command = f"INSERT INTO addresses (UserId, Home) VALUES({user_id},'{stop}') ON DUPLICATE KEY UPDATE" \
+                  f" Home='{stop}'"
+        return Users.exec_command(command)
 
     @staticmethod
-    def set_university_trolley_stop(stop):
-        pass
+    def set_university_trolley_stop(user_id, stop):
+        command = f"INSERT INTO addresses (UserId, University) VALUES({user_id},'{stop}') ON DUPLICATE KEY UPDATE" \
+                  f" University='{stop}'"
+        return Users.exec_command(command)
