@@ -5,7 +5,7 @@ from src import messages, utils
 from src.bot import bot
 from src.db import Users
 from src.utils import trams_menu, general_menu
-from src.parser.transport import Transport
+from src.transport import Transport
 
 
 # добавление пользователя в базу данных

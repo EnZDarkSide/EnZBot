@@ -4,7 +4,7 @@ from typing import List, Set
 import requests
 from lxml import html
 
-from src.parser.transport import Tram
+from src.transport.tram import Tram
 
 
 class Parser:
@@ -31,7 +31,7 @@ class Parser:
         # которые сверху этого заголовка, — трамвайные остановки;
         # иначе берутся все ссылки, которые ниже заголовка 'Трамваи'
         tram_stop_els = tree.xpath('//h3[2]/preceding-sibling::a[@href]') \
-                        or tree.xpath('//h3[1]/following-sibling::a')
+                        or tree.xpath("//h3[contains(text(), 'Трамваи')][1]/following-sibling::a")
 
         # ^((?:\w+ ?)+) \(.*$
         tram_stop_names = set(map(lambda el: re.sub(r'^([^(]+) \(.*$', r'\1', el.text), tram_stop_els))

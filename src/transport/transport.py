@@ -1,16 +1,9 @@
-from dataclasses import dataclass
 from typing import List
 
-from src.parser import Parser
+from .parser import Parser
+from .tram import Tram
 
 parser = Parser()
-
-
-@dataclass
-class Tram:
-    number: int
-    arrival_time: str
-    arrival_distance: str
 
 
 class Transport:
