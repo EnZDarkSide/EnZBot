@@ -1,5 +1,6 @@
+import re
 from dataclasses import dataclass
-from typing import List
+from typing import List, Set
 
 import requests
 from lxml import html
@@ -25,7 +26,29 @@ def parse_trolleys_from_url(url: str) -> List[Trolley]:
     return trolleys
 
 
+def parse_stops(first_letter: str) -> Set[str]:
+    url = 'https://online.ettu.ru/stations'
+
+    page = requests.get(f'{url}/{first_letter}')
+    tree = html.fromstring(page.text)
+
+    # если есть заголовок 'Троллейбусы', то все ссылки,
+    # которые сверху этого заголовка, — трамвайные остановки;
+    # иначе берутся все ссылки, которые ниже заголовка 'Трамваи'
+    tram_stop_els = tree.xpath('//h3[2]/preceding-sibling::a[@href]') \
+                    or tree.xpath('//h3[1]/following-sibling::a')
+
+    # ^((?:\w+ ?)+) \(.*$
+    tram_stop_names = set(map(lambda el: re.sub(r'^([^(]+) \(.*$', r'\1', el.text), tram_stop_els))
+
+    return tram_stop_names
+
+
 class Transport:
+    @staticmethod
+    def stop_exists(stop: str) -> bool:
+        return stop in parse_stops(stop[0].upper())
+
     @staticmethod
     def get_all_trolleys(dom: str) -> List[Trolley]:
         url = 'https://online.ettu.ru/station/4350'
