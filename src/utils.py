@@ -7,7 +7,7 @@ def general_menu():
     return create_keyboard([{"text": "Добавить группу"}, {"text": 'Указать адрес'}], [{"text": "Где трамваи?"}])
 
 
-def trolleys_menu():
+def trams_menu():
     return create_keyboard([{"text": 'Обновить данные'}, {"text": 'Указать адрес'}],
                            [{"text": 'Главное меню', "color": "secondary"}])
 

@@ -7,23 +7,23 @@ from lxml import html
 
 
 @dataclass
-class Trolley:
+class Tram:
     number: int
     arrival_time: str
     arrival_distance: str
 
 
-def parse_trolleys_from_url(url: str) -> List[Trolley]:
+def parse_trams_from_url(url: str) -> List[Tram]:
     page = requests.get(url)
     tree = html.fromstring(page.text)
 
-    trolley_elements = tree.xpath('body/div/div')[:-1]
+    tram_elements = tree.xpath('body/div/div')[:-1]
 
     # проходится по всем элементам трамвайя — его номер, время прибытия и расстояние до него —,
-    # берёт их текст и создаёт объект Trolley для каждого из них
-    trolleys = [Trolley(*map(lambda el: el.text_content(), trolley_element)) for trolley_element in trolley_elements]
+    # берёт их текст и создаёт объект Tram для каждого из них
+    trams = [Tram(*map(lambda el: el.text_content(), tram_element)) for tram_element in tram_elements]
 
-    return trolleys
+    return trams
 
 
 def parse_stops(first_letter: str) -> Set[str]:
@@ -50,10 +50,10 @@ class Transport:
         return stop in parse_stops(stop[0].upper())
 
     @staticmethod
-    def get_all_trolleys(dom: str) -> List[Trolley]:
+    def get_all_trams(dom: str) -> List[Tram]:
         url = 'https://online.ettu.ru/station/4350'
 
-        trolleys = parse_trolleys_from_url(url)
+        trams = parse_trams_from_url(url)
 
         # нужны только трамваи с номерами 14, 25 и 27
-        return list(filter(lambda trolley: trolley.number in (14, 25, 27), trolleys))
+        return list(filter(lambda tram: tram.number in (14, 25, 27), trams))

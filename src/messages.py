@@ -1,11 +1,11 @@
 dorm_choice = 'В каком общежитии ты находишься?'
-trolleys_available = 'Сейчас доступны эти трамваи'
+trams_available = 'Сейчас доступны эти трамваи'
 error = 'Видимо, произошла какая-то ошибка. Попробуй сделать это позже'
 done = 'Готово! Данные занесены в базу'
 about_to_show_menu = 'Призываем меню!'
 getting_address = 'Укажите свой адрес'
-getting_home_trolley_stop = 'С какой остановки ты ездишь в универ?'
-getting_university_trolley_stop = 'На какой остановке выходишь?'
+getting_home_tram_stop = 'С какой остановки ты ездишь в универ?'
+getting_university_tram_stop = 'На какой остановке выходишь?'
 
 
 def send_greetings(sex: bool):

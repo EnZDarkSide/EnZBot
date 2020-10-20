@@ -4,7 +4,7 @@ from vkbottle import Message
 from src import messages, utils
 from src.bot import bot
 from src.db import Users
-from src.utils import trolleys_menu, general_menu
+from src.utils import trams_menu, general_menu
 from src.parser.transport import Transport
 
 
@@ -59,27 +59,27 @@ async def update_address(answer: Message):
 
 
 @bot.on.message(text=['Указать трамвайные остановки'])
-async def start_setting_trolley_stops(answer: Message):
-    await answer(messages.getting_home_trolley_stop)
-    await move_to_branch(answer.peer_id, 'setting_home_trolley_stop')
+async def start_setting_tram_stops(answer: Message):
+    await answer(messages.getting_home_tram_stop)
+    await move_to_branch(answer.peer_id, 'setting_home_tram_stop')
 
 
-@bot.branch.simple_branch('setting_home_trolley_stop')
-async def set_home_trolley_stop(answer: Message):
+@bot.branch.simple_branch('setting_home_tram_stop')
+async def set_home_tram_stop(answer: Message):
     if Transport.stop_exists(answer.text.lower()):
-        Users.set_home_trolley_stop(answer.chat_id, answer.text)
-        msg = messages.getting_university_trolley_stop
-        await move_to_branch(answer.peer_id, 'setting_university_trolley_stop')
+        Users.set_home_tram_stop(answer.chat_id, answer.text)
+        msg = messages.getting_university_tram_stop
+        await move_to_branch(answer.peer_id, 'setting_university_tram_stop')
     else:
         msg = messages.error
 
     await answer(msg)
 
 
-@bot.branch.simple_branch('setting_university_trolley_stop')
-async def set_university_trolley_stop(answer: Message):
+@bot.branch.simple_branch('setting_university_tram_stop')
+async def set_university_tram_stop(answer: Message):
     if Transport.stop_exists(answer.text.lower()):
-        Users.set_university_trolley_stop(answer.chat_id, answer.text)
+        Users.set_university_tram_stop(answer.chat_id, answer.text)
         msg = messages.done
         bot.branch.exit(answer.peer_id)
     else:
@@ -89,13 +89,13 @@ async def set_university_trolley_stop(answer: Message):
 
 
 @bot.on.message(text=['Где трамваи?'])
-async def show_trolleys(answer: Message):
-    await answer(messages.trolleys_available, keyboard=trolleys_menu())
-    await move_to_branch(answer.peer_id, "trolleys_menu")
+async def show_tram(answer: Message):
+    await answer(messages.trams_available, keyboard=trams_menu())
+    await move_to_branch(answer.peer_id, 'trams_menu')
 
 
-@bot.branch.simple_branch("trolleys_menu")
-async def show_trolleys(answer: Message):
+@bot.branch.simple_branch("trams_menu")
+async def show_tram(answer: Message):
     if 'обновить данные' in str.lower(answer.text):
         pass
     elif 'главное меню' in str.lower(answer.text):
@@ -103,7 +103,7 @@ async def show_trolleys(answer: Message):
         await send_menu(answer)
         return
 
-    await answer(messages.trolleys_available, keyboard=trolleys_menu())
+    await answer(messages.trams_available, keyboard=trams_menu())
 
 
 @bot.on.message()
