@@ -24,7 +24,7 @@ class Parser:
         return trams
 
     def get_stops(self, first_letter: str) -> Set[str]:
-        page = requests.get(f'{self.base_url}/stations/{first_letter}')
+        page = requests.get(f'{self.base_url}/stations/{first_letter.upper()}')
         tree = html.fromstring(page.text)
 
         # если есть заголовок 'Троллейбусы', то все ссылки,

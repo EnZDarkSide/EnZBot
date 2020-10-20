@@ -7,9 +7,13 @@ parser = Parser()
 
 
 class Transport:
+    # noinspection PyShadowingNames
     @staticmethod
     def stop_exists(stop: str) -> bool:
-        return stop in parser.get_stops(stop[0].upper())
+        stop = stop.lower()
+        stops = map(lambda stop: stop.lower(), parser.get_stops(stop[0]))
+
+        return stop in stops
 
     @staticmethod
     def get_all_trams(stop_id: int) -> List[Tram]:

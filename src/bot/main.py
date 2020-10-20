@@ -66,7 +66,7 @@ async def start_setting_tram_stops(answer: Message):
 
 @bot.branch.simple_branch('setting_home_tram_stop')
 async def set_home_tram_stop(answer: Message):
-    if Transport.stop_exists(answer.text.lower()):
+    if Transport.stop_exists(answer.text):
         Users.set_home_tram_stop(answer.chat_id, answer.text)
         msg = messages.getting_university_tram_stop
         await move_to_branch(answer.peer_id, 'setting_university_tram_stop')
@@ -81,7 +81,7 @@ async def set_university_tram_stop(answer: Message):
     if Transport.stop_exists(answer.text.lower()):
         Users.set_university_tram_stop(answer.chat_id, answer.text)
         msg = messages.done
-        bot.branch.exit(answer.peer_id)
+        await bot.branch.exit(answer.peer_id)
     else:
         msg = messages.error
 
