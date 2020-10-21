@@ -60,32 +60,67 @@ async def update_address(answer: Message):
 
 @bot.on.message(text=['Указать трамвайные остановки'])
 async def start_setting_tram_stops(answer: Message):
-    await answer(messages.getting_home_tram_stop)
-    await move_to_branch(answer.peer_id, 'setting_home_tram_stop')
+    await ask_for_home_tram_stop(answer)
+
+
+async def ask_for_home_tram_stop(answer: Message):
+    await answer(messages.asking_for_home_tram_stop)
+    await move_to_branch(answer.peer_id, 'asking_for_home_tram_direction')
+
+
+@bot.branch.simple_branch('asking_for_home_tram_direction')
+async def ask_for_home_tram_direction(answer: Message):
+    tram_stop = answer.text.lower()
+
+    if Transport.stop_exists(tram_stop):
+        tram_directions = Transport.get_directions(tram_stop)
+        msg = messages.asking_for_direction
+        keyboard = utils.create_keyboard([{"text": tram_direction for tram_direction in tram_directions}])
+
+        await move_to_branch(answer.peer_id, 'setting_home_tram_stop', stop=tram_stop)
+    else:
+        msg = messages.error
+        keyboard = None
+
+    await answer(msg, keyboard=keyboard)
 
 
 @bot.branch.simple_branch('setting_home_tram_stop')
-async def set_home_tram_stop(answer: Message):
-    if Transport.stop_exists(answer.text):
-        Users.set_home_tram_stop(answer.chat_id, answer.text)
-        msg = messages.getting_university_tram_stop
-        await move_to_branch(answer.peer_id, 'setting_university_tram_stop')
+async def set_home_tram_stop(answer: Message, stop: str):
+    stop_id = Transport.get_stop_id(stop, answer.text)
+    Users.set_home_tram_stop(answer.chat_id, stop_id)
+    await ask_for_university_tram_stop(answer)
+
+
+async def ask_for_university_tram_stop(answer: Message):
+    await answer(messages.asking_for_university_tram_stop)
+    await move_to_branch(answer.peer_id, 'asking_for_university_tram_direction')
+
+
+@bot.branch.simple_branch('asking_for_university_tram_direction')
+async def ask_for_university_tram_direction(answer: Message):
+    tram_stop = answer.text.lower()
+
+    if Transport.stop_exists(tram_stop):
+        tram_directions = Transport.get_directions(tram_stop)
+        msg = messages.asking_for_direction
+        keyboard = utils.create_keyboard([{"text": tram_direction for tram_direction in tram_directions}])
+
+        await move_to_branch(answer.peer_id, 'setting_university_tram_stop', stop=tram_stop)
     else:
         msg = messages.error
+        keyboard = None
 
-    await answer(msg)
+    await answer(msg, keyboard=keyboard)
 
 
 @bot.branch.simple_branch('setting_university_tram_stop')
-async def set_university_tram_stop(answer: Message):
-    if Transport.stop_exists(answer.text.lower()):
-        Users.set_university_tram_stop(answer.chat_id, answer.text)
-        msg = messages.done
-        await bot.branch.exit(answer.peer_id)
-    else:
-        msg = messages.error
+async def set_university_tram_direction(answer: Message, stop: str):
+    stop_id = Transport.get_stop_id(stop, answer.text)
+    Users.set_university_tram_stop(answer.chat_id, stop_id)
 
-    await answer(msg)
+    await answer(messages.done)
+    await bot.branch.exit(answer.peer_id)
 
 
 @bot.on.message(text=['Где трамваи?'])
@@ -124,9 +159,9 @@ async def send_greetings(answer: Message):
         Users.add(answer.from_id, f'{user[0].first_name} {user[0].last_name}')
 
 
-async def move_to_branch(peer_id: int, branch_name: str):
+async def move_to_branch(peer_id: int, branch_name: str, **kwargs):
     await bot.branch.exit(peer_id)
-    await bot.branch.add(peer_id, branch_name)
+    await bot.branch.add(peer_id, branch_name, **kwargs)
 
 
 if __name__ == '__main__':
