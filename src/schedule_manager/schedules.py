@@ -1,6 +1,5 @@
 import json
 from datetime import datetime
-
 import requests
 
 
@@ -11,7 +10,7 @@ class ScheduleUSUE:
         return json.loads(response.text)
 
     @staticmethod
-    def get_schedule(group, start_date='', end_date=''):
+    def get_schedule(group: str, start_date='', end_date=''):
         start_date = datetime.today().strftime('%d.%m.%Y') if start_date == '' else start_date
         end_date = datetime.today().strftime('%d.%m.%Y') if end_date == '' else end_date
 
@@ -37,7 +36,6 @@ class ScheduleUSUE:
 
             else:
                 for pair_time in day['pairs']:
-                    text += f"Время: {pair_time['time']} {'(Сейчас)' if pair_time['isCurrentPair'] else ''}\n "
 
                     pairs_count = len(pair_time['schedulePairs'])
 
@@ -47,7 +45,9 @@ class ScheduleUSUE:
                         text += f'{pair_number}{pair["subject"]}\n' \
                                 f'Группа: {pair["group"]}\n' \
                                 f'Преподаватель: {pair["teacher"]}\n' \
-                                f'Аудитория: {pair["aud"]}\n\n'
+                                f'Аудитория: {pair["aud"]}\n'
+
+                    text += f"Время: {pair_time['time']} {'(Сейчас)' if pair_time['isCurrentPair'] else ''}\n\n "
 
             days_arr.append(text)
 

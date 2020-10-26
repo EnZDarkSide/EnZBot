@@ -3,8 +3,10 @@ from vkbottle import Message
 
 from src import messages, utils
 from src.bot import bot
-from src.db import Users
-from src.utils import trams_menu, general_menu
+from src.bot.branch_manager import move_to_branch
+from src.database.Groups import DBGroups
+from src.utils import trams_keyboard, general_keyboard
+from src.schedule_manager import schedule_menu
 from src.transport import Transport
 
 
@@ -24,16 +26,7 @@ from src.transport import Transport
 
 @bot.on.message(text=['Меню', 'Главное меню', '?'])
 async def send_menu(answer: Message):
-    await answer(message=messages.about_to_show_menu, keyboard=utils.general_menu())
-
-
-# @bot.on.message(text=['Добавить себя'])
-# async def add_user(answer: Message):
-#     if not Users.add(answer.peer_id):
-#         await answer(messages.error, keyboard=general_menu())
-#         return
-#
-#     await answer("Готово")
+    await answer(message=messages.resp_show_menu, keyboard=utils.general_keyboard())
 
 
 @bot.on.message(text=['Указать адрес'])
@@ -45,17 +38,15 @@ async def updating_address_start(answer: Message):
 @bot.branch.simple_branch("updating_address")
 async def update_address(answer: Message):
     if str.lower(answer.text) not in ['назад', 'выйти', 'главное меню', 'меню']:
-        if Users.update_address(answer.from_id, answer.text):
+        if Addresses.add_or_update(answer.from_id, answer.text):
             msg = messages.done
         else:
             msg = messages.error
-    # пользователь вызывает меню,
-    # поэтому сообщение о добалвенных данных показывать не надо
     else:
-        msg = messages.about_to_show_menu
+        msg = messages.resp_show_menu
 
     await bot.branch.exit(answer.peer_id)
-    await answer(msg, keyboard=general_menu())
+    await answer(msg, keyboard=general_keyboard())
 
 
 @bot.on.message(text=['Указать трамвайные остановки'])
@@ -88,7 +79,7 @@ async def ask_for_home_tram_direction(answer: Message):
 @bot.branch.simple_branch('setting_home_tram_stop')
 async def set_home_tram_stop(answer: Message, stop: str):
     stop_id = Transport.get_stop_id(stop, answer.text)
-    Users.set_home_tram_stop(answer.chat_id, stop_id)
+    Addresses.set_home_tram_stop(answer.chat_id, stop_id)
     await ask_for_university_tram_stop(answer)
 
 
@@ -117,7 +108,7 @@ async def ask_for_university_tram_direction(answer: Message):
 @bot.branch.simple_branch('setting_university_tram_stop')
 async def set_university_tram_direction(answer: Message, stop: str):
     stop_id = Transport.get_stop_id(stop, answer.text)
-    Users.set_university_tram_stop(answer.chat_id, stop_id)
+    Addresses.set_university_tram_stop(answer.chat_id, stop_id)
 
     await answer(messages.done)
     await bot.branch.exit(answer.peer_id)
@@ -125,7 +116,7 @@ async def set_university_tram_direction(answer: Message, stop: str):
 
 @bot.on.message(text=['Где трамваи?'])
 async def show_tram(answer: Message):
-    await answer(messages.trams_available, keyboard=trams_menu())
+    await answer(messages.trams_available, keyboard=trams_keyboard())
     await move_to_branch(answer.peer_id, 'trams_menu')
 
 
@@ -138,10 +129,9 @@ async def show_tram(answer: Message):
         await send_menu(answer)
         return
 
-    await answer(messages.trams_available, keyboard=trams_menu())
+    await answer(messages.trams_available, keyboard=trams_keyboard())
 
 
-@bot.on.message()
 @bot.on.message(text=['Начать'])
 async def send_greetings(answer: Message):
     await bot.branch.exit(answer.peer_id)
@@ -150,18 +140,13 @@ async def send_greetings(answer: Message):
 
     await bot.api.messages.send(
         user_id=answer.from_id,
-        keyboard=general_menu(),
-        message=messages.send_greetings(user[0].sex),
+        message=messages.send_greetings(user[0]),
         random_id=bot.extension.random_id()
     )
 
-    if not Users.contains(answer.from_id):
-        Users.add(answer.from_id, f'{user[0].first_name} {user[0].last_name}')
-
-
-async def move_to_branch(peer_id: int, branch_name: str, **kwargs):
-    await bot.branch.exit(peer_id)
-    await bot.branch.add(peer_id, branch_name, **kwargs)
+    if not DBGroups.get(answer.from_id):
+        await answer('Чтобы продолжить, вам нужно вписать группу для расписания')
+        await move_to_branch(answer.peer_id, 'groups_update')
 
 
 if __name__ == '__main__':

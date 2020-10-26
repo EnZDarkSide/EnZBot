@@ -11,3 +11,9 @@ vkbottle==2.7.12
 # зависимости vkbottle
 loguru==0.5.3
 ujson==3.2.0
+
+
+# поиск
+python-Levenshtein==0.12.0
+fuzzywuzzy==0.18.0
+numpy~=1.19.2
