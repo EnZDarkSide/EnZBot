@@ -8,9 +8,9 @@ cur = con.cursor()
 
 class DB:
     @staticmethod
-    async def exec_command(command, to_commit=True):
+    def exec_command(command, to_commit=True):
         try:
-            affected_rows = await cur.execute(command)
+            affected_rows = cur.execute(command)
 
             if to_commit:
                 con.commit()
