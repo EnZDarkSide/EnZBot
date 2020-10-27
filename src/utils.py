@@ -23,7 +23,7 @@ def get_week(_date):
 
 
 def general_keyboard():
-    return create_keyboard([{"text": "Расписание"}, {"text": "Портал"}], [{"text": "Где трамваи?"}])
+    return create_keyboard([{"text": "Расписание"}])
 
 
 def range_menu(arr):

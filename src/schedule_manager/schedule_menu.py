@@ -31,7 +31,7 @@ async def get_schedule(answer: Message):
     request = DBGroups.get(answer.from_id)
 
     if request is None:
-        await answer('Ошибка', keyboard=utils.schedule_keyboard())
+        await answer(f'Ошибка, {request}', keyboard=utils.schedule_keyboard())
 
     group = request[0]
 

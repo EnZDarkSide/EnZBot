@@ -4,11 +4,13 @@ from vkbottle import Message
 from src import messages, utils
 from src.bot import bot
 from src.bot.branch_manager import move_to_branch
+from src.database.Addresses import DBAddresses
 from src.database.Groups import DBGroups
+from src.groups.groups import update_group
+from src.transport import Transport
 from src.utils import trams_keyboard, general_keyboard
 from src.schedule_manager import schedule_menu
-from src.transport import Transport
-
+from src.groups import *
 
 # добавление пользователя в базу данных
 # приветствие
@@ -38,7 +40,7 @@ async def updating_address_start(answer: Message):
 @bot.branch.simple_branch("updating_address")
 async def update_address(answer: Message):
     if str.lower(answer.text) not in ['назад', 'выйти', 'главное меню', 'меню']:
-        if Addresses.add_or_update(answer.from_id, answer.text):
+        if DBAddresses.add_or_update(answer.from_id, answer.text):
             msg = messages.done
         else:
             msg = messages.error
@@ -79,7 +81,7 @@ async def ask_for_home_tram_direction(answer: Message):
 @bot.branch.simple_branch('setting_home_tram_stop')
 async def set_home_tram_stop(answer: Message, stop: str):
     stop_id = Transport.get_stop_id(stop, answer.text)
-    Addresses.set_home_tram_stop(answer.chat_id, stop_id)
+    DBAddresses.set_home_tram_stop(answer.chat_id, stop_id)
     await ask_for_university_tram_stop(answer)
 
 
@@ -108,7 +110,7 @@ async def ask_for_university_tram_direction(answer: Message):
 @bot.branch.simple_branch('setting_university_tram_stop')
 async def set_university_tram_direction(answer: Message, stop: str):
     stop_id = Transport.get_stop_id(stop, answer.text)
-    Addresses.set_university_tram_stop(answer.chat_id, stop_id)
+    DBAddresses.set_university_tram_stop(answer.chat_id, stop_id)
 
     await answer(messages.done)
     await bot.branch.exit(answer.peer_id)
@@ -147,6 +149,14 @@ async def send_greetings(answer: Message):
     if not DBGroups.get(answer.from_id):
         await answer('Чтобы продолжить, вам нужно вписать группу для расписания')
         await move_to_branch(answer.peer_id, 'groups_update')
+        return
+
+    await answer('Вы уже вписали свою группу', keyboard=general_keyboard())
+
+
+@bot.branch.simple_branch('groups_update')
+async def groups_update(answer: Message):
+    await update_group(answer)
 
 
 if __name__ == '__main__':

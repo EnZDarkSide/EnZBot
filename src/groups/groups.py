@@ -10,9 +10,7 @@ from src.utils import general_keyboard, range_menu
 schedule = ScheduleManager().schedules["УрГЭУ"]
 
 
-@bot.branch.simple_branch('groups_update')
 async def update_group(answer: Message):
-
     group = answer.text
     groups_list = schedule.get_list_of_groups(group)
     similar_groups = process.extract(group, groups_list, limit=5)
