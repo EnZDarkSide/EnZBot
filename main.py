@@ -154,6 +154,12 @@ async def send_greetings(answer: Message):
     await answer('Вы уже вписали свою группу', keyboard=general_keyboard())
 
 
+@bot.on.message()
+async def rand_message(answer: Message):
+    await answer("Вызываем меню", keyboard=general_keyboard())
+
+
+
 @bot.branch.simple_branch('groups_update')
 async def groups_update(answer: Message):
     await update_group(answer)

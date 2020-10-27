@@ -22,6 +22,12 @@ async def get_schedule(answer: Message):
     await move_to_branch(answer.peer_id, 'schedule_main')
 
 
+@bot.on.message(text=['Расписание на <date>', 'Р <date>'])
+async def get_schedule(answer: Message, date):
+    await move_to_branch(answer.peer_id, 'schedule_main')
+    await get_schedule(answer)
+
+
 @bot.branch.simple_branch('schedule_main')
 async def get_schedule(answer: Message):
     if answer.text.lower() in ['назад']:
