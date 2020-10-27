@@ -35,7 +35,7 @@ async def get_schedule(answer: Message):
         await bot.branch.exit(answer.peer_id)
         return
 
-    request = DBGroups.get(answer.from_id)
+    request = await DBGroups.get(answer.from_id)
 
     if request is None:
         await answer(f'Ошибка, {request}', keyboard=utils.schedule_keyboard())
