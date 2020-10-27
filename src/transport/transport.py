@@ -29,8 +29,9 @@ class Transport:
 
         directions = []
         for tram_stop_with_direction in parser.get_raw_stops(tram_stop[0]):
-            if direction_match := re.match(rf'^{tram_stop} \(([^)]+)\)$', tram_stop_with_direction,
-                                           flags=re.IGNORECASE):
+            direction_match = re.match(rf'^{tram_stop} \(([^)]+)\)$', tram_stop_with_direction,
+                                        flags=re.IGNORECASE)
+            if direction_match:
                 directions.append(direction_match.group(1))
 
         return directions
