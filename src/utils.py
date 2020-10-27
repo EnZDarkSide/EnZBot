@@ -2,13 +2,24 @@ import datetime
 import itertools
 import json
 
-from numpy import array_split
+import numpy as np
 from vkbottle import keyboard_gen
 from datetime import date
 import calendar
 import locale
 
 locale.setlocale(locale.LC_ALL, 'ru_RU')
+
+one_day = datetime.timedelta(days=1)
+
+
+def get_week(_date):
+    day_idx = (_date.weekday()) % 7  # turn sunday into 0, monday into 1, etc.
+    monday = _date - datetime.timedelta(days=day_idx)
+    _date = monday
+    for n in range(7):
+        yield _date
+        _date += one_day
 
 
 def general_keyboard():
@@ -24,21 +35,41 @@ def trams_keyboard():
                            [{"text": 'Главное меню', "color": "secondary"}])
 
 
+def button(day_name, start_date, end_date=None, color='primary'):
+    if end_date is None:
+        end_date = start_date
+
+    return {"start_date": start_date.strftime("%d.%m.%Y"), "end_date": end_date.strftime("%d.%m.%Y"),
+            "day_name": day_name, "color": color}
+
+
 def schedule_keyboard():
-    base = datetime.datetime.today()
-    date_list = [base - datetime.timedelta(days=x) for x in range(4, -3, -1)]
     today_index = date.today().weekday()
 
-    wd_list = []
+    week_dates = list(get_week(datetime.datetime.now().date()))
 
-    for d in date_list:
-        wd_list.append([{"start_date": d.date().strftime("%d.%m.%Y"), "end_date": d.date().strftime("%d.%m.%Y"),
-                         "day_name": calendar.day_name[d.weekday()] if d.weekday() != today_index else 'Сегодня'}])
+    buttons = []
 
-    return create_keyboard(*[[{"text": elem['day_name'],
-                               "payload": json.dumps(elem),
-                               "color": 'positive' if elem['day_name'] == 'Сегодня' else "primary"}
-                              for elem in arr] for arr in wd_list])
+    for d in week_dates:
+        buttons.append(button(
+            calendar.day_name[d.weekday()].capitalize() if d.weekday() != today_index else 'Сегодня', d, d))
+
+    tomorrow_date = datetime.datetime.now() + datetime.timedelta(days=1)
+
+    next_week = list(get_week(datetime.datetime.now().date() + datetime.timedelta(days=7)))
+
+    top_buttons = [
+        button('Завтра', tomorrow_date, tomorrow_date),
+        button('На нед.', week_dates[0], week_dates[6], 'secondary'),
+        button('На след. нед.', next_week[0], next_week[6], 'secondary')
+    ]
+
+    buttons_arr = [top_buttons, buttons[3:6], buttons[:3]]
+
+    return create_keyboard(*[[{"text": btn['day_name'],
+                               "payload": json.dumps(btn),
+                               "color": 'positive' if btn['day_name'] == 'Сегодня' else btn['color']}
+                              for btn in split] for split in buttons_arr], [{"text": 'Назад', "color": 'secondary'}])
 
 
 def address_menu():

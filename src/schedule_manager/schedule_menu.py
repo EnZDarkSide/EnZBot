@@ -15,7 +15,7 @@ schedule = ScheduleManager().schedules['УрГЭУ']
 schedule_menu_obj = None
 
 
-@bot.on.message(text='Расписание')
+@bot.on.message(text=['Расписание', 'Р'])
 async def get_schedule(answer: Message):
     await answer('На какой день показать расписание?', keyboard=utils.schedule_keyboard())
     await move_to_branch(answer.peer_id, 'schedule_main')
@@ -37,4 +37,5 @@ async def get_schedule(answer: Message):
 
     pl = json.loads(answer.payload)
     result = schedule.get_schedule(group, pl['start_date'], pl['end_date'])
-    await answer(result, keyboard=utils.schedule_keyboard())
+    for r in result:
+        await answer(r, keyboard=utils.schedule_keyboard())
