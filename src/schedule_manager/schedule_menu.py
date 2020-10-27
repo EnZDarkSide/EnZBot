@@ -28,12 +28,12 @@ async def get_schedule(answer: Message):
         await bot.branch.exit(answer.peer_id)
         return
 
-    group = DBGroups.get(answer.from_id)[0]
+    request = DBGroups.get(answer.from_id)
 
-    if group is None:
+    if request is None:
         await answer('Ошибка', keyboard=utils.schedule_keyboard())
 
-    weekdays = [n.lower() for n in calendar.day_name] + ['cегодня']
+    group = request[0]
 
     pl = json.loads(answer.payload)
     result = schedule.get_schedule(group, pl['start_date'], pl['end_date'])
