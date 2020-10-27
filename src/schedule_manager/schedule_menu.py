@@ -1,5 +1,6 @@
 import calendar
 import json
+from itertools import chain
 
 from vkbottle import Message
 
@@ -8,7 +9,7 @@ from src.bot import bot
 from src.bot.branch_manager import move_to_branch
 from src.database.Groups import DBGroups
 from src.schedule_manager.schedule_manager import ScheduleManager
-from src.utils import general_keyboard
+from src.utils import general_keyboard, b_arr
 
 schedule = ScheduleManager().schedules['УрГЭУ']
 
@@ -35,7 +36,8 @@ async def get_schedule(answer: Message):
 
     group = request[0]
 
-    pl = json.loads(answer.payload)
-    result = schedule.get_schedule(group, pl['start_date'], pl['end_date'])
-    for r in result:
-        await answer(r, keyboard=utils.schedule_keyboard())
+    if answer.text in b_arr:
+        pl = json.loads(answer.payload)
+        result = schedule.get_schedule(group, pl['start_date'], pl['end_date'])
+        for r in result:
+            await answer(r, keyboard=utils.schedule_keyboard())

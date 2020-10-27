@@ -44,6 +44,15 @@ def button(day_name, start_date, end_date=None, color='primary'):
 
 
 def schedule_keyboard():
+    buttons_arr = schedule_keyboard_obj()
+
+    return create_keyboard(*[[{"text": btn['day_name'],
+                               "payload": json.dumps(btn),
+                               "color": 'positive' if btn['day_name'] == 'Сегодня' else btn['color']}
+                              for btn in split] for split in buttons_arr], [{"text": 'Назад', "color": 'secondary'}])
+
+
+def schedule_keyboard_obj():
     today_index = date.today().weekday()
 
     week_dates = list(get_week(datetime.datetime.now().date()))
@@ -65,11 +74,11 @@ def schedule_keyboard():
     ]
 
     buttons_arr = [top_buttons, buttons[3:6], buttons[:3]]
+    return buttons_arr
 
-    return create_keyboard(*[[{"text": btn['day_name'],
-                               "payload": json.dumps(btn),
-                               "color": 'positive' if btn['day_name'] == 'Сегодня' else btn['color']}
-                              for btn in split] for split in buttons_arr], [{"text": 'Назад', "color": 'secondary'}])
+
+# Список всех кнопок
+b_arr = list(itertools.chain(*[[btn['day_name'] for btn in row] for row in schedule_keyboard_obj()]))
 
 
 def address_menu():
