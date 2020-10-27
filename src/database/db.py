@@ -10,6 +10,7 @@ class DB:
     @staticmethod
     def exec_command(command, to_commit=True):
         try:
+            con.ping(reconnect=True)
             affected_rows = cur.execute(command)
 
             if to_commit:
