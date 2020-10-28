@@ -7,7 +7,7 @@ from lxml import html
 from src.transport.tram import Tram
 
 
-class TramParser:
+class Parser:
     def __init__(self):
         self.base_url = 'https://online.ettu.ru'
 

@@ -1,11 +1,11 @@
 from unittest import TestCase
 
-from src.parser import TramParser
+from src.transport.parser import Parser
 
 
 class TestGetStops(TestCase):
     def setUp(self):
-        self.parser = TramParser()
+        self.parser = Parser()
 
     def test_one_stop_only(self):
         self.assertSetEqual(self.parser.get_stops('Е'), {'Ельцина'})
