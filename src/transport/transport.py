@@ -1,10 +1,10 @@
 import re
 from typing import List, Iterator
 
-from .parser import Parser
+from src.parser import TramParser
 from .tram import Tram
 
-parser = Parser()
+parser = TramParser()
 
 
 class Transport:
