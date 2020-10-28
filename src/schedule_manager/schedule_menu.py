@@ -47,3 +47,5 @@ async def get_schedule(answer: Message):
         result = schedule.get_schedule(group, pl['start_date'], pl['end_date'])
         for r in result:
             await answer(r, keyboard=utils.schedule_keyboard())
+    else:
+        await answer("Шо? Нипонял (пасхалка найдена)", keyboard=utils.schedule_keyboard())
