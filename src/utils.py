@@ -1,15 +1,16 @@
+import calendar
 import datetime
 import itertools
 import json
-
-import numpy as np
-from vkbottle import keyboard_gen
-from datetime import date
-import calendar
 import locale
+
+import pytz
+from pytz import timezone
+from vkbottle import keyboard_gen
 
 locale.setlocale(locale.LC_ALL, 'ru_RU')
 
+tz = timezone('Asia/Yekaterinburg')
 one_day = datetime.timedelta(days=1)
 
 
@@ -53,9 +54,10 @@ def schedule_keyboard():
 
 
 def schedule_keyboard_obj():
-    today_index = date.today().weekday()
+    dt = local_dt_now()
 
-    week_dates = list(get_week(datetime.datetime.now().date()))
+    today_index = dt.today().weekday()
+    week_dates = list(get_week(dt.now().date()))
 
     buttons = []
 
@@ -63,9 +65,9 @@ def schedule_keyboard_obj():
         buttons.append(button(
             calendar.day_name[d.weekday()].capitalize() if d.weekday() != today_index else 'Сегодня', d, d))
 
-    tomorrow_date = datetime.datetime.now() + datetime.timedelta(days=1)
+    tomorrow_date = dt.now() + datetime.timedelta(days=1)
 
-    next_week = list(get_week(datetime.datetime.now().date() + datetime.timedelta(days=7)))
+    next_week = list(get_week(dt.now().date() + datetime.timedelta(days=7)))
 
     top_buttons = [
         button('Завтра', tomorrow_date, tomorrow_date),
@@ -75,6 +77,10 @@ def schedule_keyboard_obj():
 
     buttons_arr = [top_buttons, buttons[3:6], buttons[:3]]
     return buttons_arr
+
+
+def local_dt_now():
+    return datetime.datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(tz)
 
 
 # Список всех кнопок
