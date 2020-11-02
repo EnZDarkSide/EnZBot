@@ -52,7 +52,7 @@ async def portal_tasks(answer: Message):
         await bot.branch.exit(answer.peer_id)
         return
 
-    if not answer.text.isdigit() or 1 > int(answer.text) > len(pp.subjects):
+    if not answer.text.isdigit() or int(answer.text) not in range(1, len(pp.subjects)+1):
         await answer(f'Введите число от 1 до {len(pp.subjects)}', keyboard=kb_exit)
         return
 
