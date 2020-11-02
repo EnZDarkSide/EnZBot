@@ -1,6 +1,4 @@
-import calendar
 import json
-from itertools import chain
 
 from vkbottle import Message
 

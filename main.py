@@ -9,7 +9,8 @@ from src.database.Groups import DBGroups
 from src.groups.groups import update_group
 from src.transport import Transport
 from src.utils import trams_keyboard, general_keyboard
-from src.schedule_manager import schedule_menu
+from src.schedule_manager import schedule_endpoint
+from src.portal import portal_endpoint
 from src.groups import *
 
 # добавление пользователя в базу данных
@@ -157,7 +158,6 @@ async def send_greetings(answer: Message):
 @bot.on.message()
 async def rand_message(answer: Message):
     await answer("Вызываем меню", keyboard=general_keyboard())
-
 
 
 @bot.branch.simple_branch('groups_update')
