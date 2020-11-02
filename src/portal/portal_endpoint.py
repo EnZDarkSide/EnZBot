@@ -23,6 +23,10 @@ async def portal_subjects(answer, with_subjects=True):
         await bot.branch.exit(answer.peer_id)
 
     pm = await get_portal_for_user(answer)
+
+    if pm is None:
+        return
+
     if with_subjects:
         subjects = [subj for subj in pm.get_sites()]
 
@@ -53,11 +57,16 @@ async def portal_tasks(answer: Message):
         return
 
     href = pp.subjects[int(answer.text)-1]['href']
-    tasks = format_tasks(pp.get_tasks(href))
+
+    try:
+        tasks = format_tasks(pp.get_tasks(href))
+    except IndexError:
+        await answer('Раздел заданий для этого предмета не открыт', keyboard=kb_exit)
+        await portal_subjects(answer, with_subjects=False)
 
     if len(tasks) < 1:
-        await answer('У вас нет заданий', keyboard=kb_exit)
-        await bot.branch.exit(answer.peer_id)
+        await answer('У вас нет заданий для этого предмета', keyboard=kb_exit)
+        await portal_subjects(answer, with_subjects=False)
 
     for task in tasks[:-1]:
         await answer(task)
@@ -78,7 +87,7 @@ async def portal_data_update(answer: Message):
 
     # Попытка войти на портал (без сохранения менеджера)
     if len(temp) != 2 or try_login(temp[0], temp[1]) is False:
-        await answer('Похоже, что-то пошло не так. Попробуйте снова', keyboard=kb_exit)
+        await answer('Не удалось войти в систему. Попробуйте снова', keyboard=kb_exit)
         return
 
     # Попытка добавить в базу логин и пароль

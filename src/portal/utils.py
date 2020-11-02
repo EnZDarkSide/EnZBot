@@ -22,4 +22,5 @@ async def get_portal_for_user(answer: Message) -> PortalManager:
 async def update_portal_data(answer: Message):
     await answer(f'Похоже, вам нужно указать данные для входа в портал.'
                  f'Для этого введите через пробел логин и пароль от портала')
-    return move_to_branch(answer.peer_id, 'portal_data_update')
+    await move_to_branch(answer.peer_id, 'portal_data_update')
+    return

@@ -82,6 +82,7 @@ class PortalManager:
 
         r = re.compile(f'href.+" title="{to_title}"')
         raw_section_link = re.findall(r, from_response.text)[0]
+
         section_link = re.findall(r'(?<=href=")(.*)(?=\" title)', raw_section_link)[0]
         response = requests.post(section_link, headers={'Cookie': self.cookies})
         return response
