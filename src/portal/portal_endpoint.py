@@ -28,7 +28,8 @@ async def portal_subjects(answer, with_subjects=True):
 
         await answer('Какой из предметов вас интересует?')
         if len(subjects) > 0:
-            await answer('\n'.join([f'{index+1}. {subject["text"]}' for index, subject in enumerate(subjects)]))
+            await answer('\n'.join([f'{index+1}. {subject["text"]}' for index, subject in enumerate(subjects)]),
+                         keyboard=kb_exit)
 
     else:
         await answer('Какой из предметов вас интересует?', keyboard=kb_exit)
