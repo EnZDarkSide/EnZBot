@@ -19,3 +19,4 @@ fuzzywuzzy==0.18.0
 numpy~=1.19.2
 pytz~=2020.1
 beautifulsoup4~=4.9.3
+expiringdict~=1.2.1

@@ -4,6 +4,8 @@ import requests
 from lxml import html
 from bs4 import BeautifulSoup
 
+from src.schedule_manager.filters import filters
+
 
 def try_login(login: str, pwd: str):
     login_url = "https://portal.usue.ru/portal/xlogin"
@@ -21,11 +23,10 @@ def try_login(login: str, pwd: str):
 def format_tasks(tasks: []):
     result = []
     for task in tasks:
-        text = f'Название: { task["title"] }\n' \
-               f'Статус: { task["status"]}\n' \
-               f'Выдано: { task["openDate"]}\n' \
-               f'Срок сдачи: { task["dueDate"]}\n' \
-
+        text = f'Название: {task["title"]}\n' \
+               f'Статус: {task["status"]}\n' \
+               f'Выдано: {task["openDate"]}\n' \
+               f'Срок сдачи: {task["dueDate"]}\n'
         result.append(text)
     return result
 
@@ -36,6 +37,7 @@ class PortalManager:
         self.tasks = []
         self.base_response, self.cookies = try_login(login, pwd)
         self.subjects = []
+        self.get_sites()
 
     def get_sites(self):
         iframe_str = self.extract_iframe_html(self.base_response, "Изменение и создание сайтов")
@@ -49,7 +51,7 @@ class PortalManager:
 
         return result
 
-    def get_tasks(self, url) -> []:
+    def get_tasks(self, url, filter_name=None) -> []:
         response = self.move_to(url)
 
         iframe = self.extract_iframe_html(response, "Выдача, сбор и проверка заданий в режиме онлайн.")
@@ -58,6 +60,9 @@ class PortalManager:
         result = []
 
         rows = iframe_parsed.find_all('tr')
+
+        if filter_name is str:
+            rows = [row for row in rows if filters[filter_name](row)]
 
         for row in rows[1:]:
             td_arr = row.find_all('td')

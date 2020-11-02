@@ -1,68 +1,51 @@
-import json
-from typing import Dict
-
 from vkbottle import Message
 
 from src import messages
 from src.bot import bot
 from src.bot.branch_manager import move_to_branch
 from src.database.Portal import DBPortal
-from src.portal.parser import PortalManager, format_tasks, try_login
+from src.portal.parser import format_tasks, try_login
+from src.portal.utils import get_portal_for_user
 from src.utils import general_keyboard, create_keyboard
-from vkbottle.framework import CtxStorage
-
-portal_users = dict()
 
 
 @bot.on.message(text=['Портал', 'П'])
 async def portal(answer: Message):
-    user = DBPortal.get(answer.from_id)
-
-    if user is None:
-        await update_portal_datа(answer)
-    else:
-        await get_portal_subjects(answer, user)
+    await portal_subjects(answer)
 
 
-async def update_portal_datа(answer: Message):
-    await answer(f'Похоже, вам нужно указать данные для входа в портал.'
-                 f'Для этого введите через пробел логин и пароль от портала')
-    await move_to_branch(answer.peer_id, 'portal_data_update')
+async def portal_subjects(answer, with_subjects=True):
+    """Список всех предметов из портала"""
+    if answer.text.lower() in ['Выйти']:
+        await answer('Главное меню', keyboard=general_keyboard())
+        await bot.branch.exit(answer.peer_id)
 
+    pm = await get_portal_for_user(answer)
+    subjects = []
 
-async def get_portal_subjects(answer: Message, user):
-    try:
-        pm = PortalManager(user[0], user[1])
-    except ValueError:
-        await update_portal_datа(answer)
+    if with_subjects:
+        subjects = [subj for subj in pm.get_sites()]
 
-    subjects = pm.get_sites()
-
-    await move_to_portal_subject(answer, subjects)
-
-
-async def move_to_portal_subject(answer, subjects):
     await answer('Какой из предметов вас интересует?')
     if len(subjects) > 0:
         await answer('\n'.join([f'{index+1}. {subject["text"]}' for index, subject in enumerate(subjects)]))
-    await move_to_branch(answer.peer_id, 'portal_subject')
+
+    await move_to_branch(answer.peer_id, 'portal_tasks')
 
 
-@bot.branch.simple_branch('portal_subject')
-async def get_portal_tasks(answer: Message):
-    pp = portal_users[answer.from_id]
+@bot.branch.simple_branch('portal_tasks')
+async def portal_tasks(answer: Message):
+    """Получение всех заданий для предмета"""
+
+    pp = await get_portal_for_user(answer)
 
     if answer.text.lower() in ['назад']:
         await answer('Возвращаемся', keyboard=general_keyboard())
-        await move_to_portal_subject(answer, pp.subjects)
+        await bot.branch.exit(answer.peer_id)
         return
 
-    if not answer.text.isdigit():
-        await answer('Введите число')
-        return
-
-    if 1 > int(answer.text) > len(pp.subjects):
-        await answer(f'Введите число от 1 до {len(pp.subjects)}')
+    if not answer.text.isdigit() or 1 > int(answer.text) > len(pp.subjects):
+        await answer(f'Введите число от 1 до {len(pp.subjects)}', keyboard=create_keyboard([{'text': 'Назад'}]))
         return
 
     href = pp.subjects[int(answer.text)-1]['href']
@@ -71,13 +54,14 @@ async def get_portal_tasks(answer: Message):
     if len(tasks) < 1:
         await answer('У вас нет заданий', keyboard=create_keyboard([{'text': 'Назад'}]))
         await bot.branch.exit(answer.peer_id)
-        return
 
     for task in tasks[:-1]:
         await answer(task)
 
-    await answer(tasks[-1], keyboard=create_keyboard([{'text': 'Назад'}]))
-    await move_to_portal_subject(answer, [])
+    # Получаем меню вместе с последним сообщением
+    await answer(tasks[-1],
+                 )
+    await portal_subjects(answer, with_subjects=False)
 
 
 @bot.branch.simple_branch('portal_data_update')
@@ -89,20 +73,17 @@ async def portal_data_update(answer: Message):
 
     temp = answer.text.split(' ')
 
-    try:
-        lgn = temp[0]
-        pwd = temp[1]
-    except IndexError or ValueError:
+    # Попытка войти на портал (без сохранения менеджера)
+    if len(temp) != 2 or try_login(temp[0], temp[1]) is False:
         await answer('Похоже, что-то пошло не так. Попробуйте снова', keyboard=create_keyboard([{'text': 'Назад'}]))
         return
 
-    if try_login(lgn, pwd) is False:
-        await answer('Похоже, что-то пошло не так. Попробуйте снова', keyboard=create_keyboard([{'text': 'Назад'}]))
-        return
-
-    if not DBPortal.add_or_update(answer.from_id, lgn, pwd):
-        await answer('Похоже, что-то пошло не так. Попробуйте снова', keyboard=create_keyboard([{'text': 'Назад'}]))
+    # Попытка добавить в базу логин и пароль
+    if not DBPortal.add_or_update(answer.from_id, temp[0], temp[1]):
+        await answer('Похоже, при добавлении записи в базу что-то пошло не так.'
+                     ' Попробуйте снова', keyboard=create_keyboard([{'text': 'Назад'}]))
         return
 
     await answer(messages.done, keyboard=general_keyboard())
     await bot.branch.exit(answer.peer_id)
+
