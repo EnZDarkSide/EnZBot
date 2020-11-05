@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Менеджер расписаний. Позволяет получать расписание для любого вуза.
-from src.schedule_manager.schedules import ScheduleUSUE
+from src.schedule.entities.usue import ScheduleUSUE
 
 
 class ScheduleManager:

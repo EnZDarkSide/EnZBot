@@ -20,3 +20,5 @@ numpy~=1.19.2
 pytz~=2020.1
 beautifulsoup4~=4.9.3
 expiringdict~=1.2.1
+vbml~=0.5.93
+aiohttp~=3.6.2

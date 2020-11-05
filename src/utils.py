@@ -5,22 +5,11 @@ import json
 import locale
 
 import pytz
-from pytz import timezone
 from vkbottle import keyboard_gen
 
+from src._date import tz, get_week
+
 locale.setlocale(locale.LC_ALL, 'ru_RU')
-
-tz = timezone('Asia/Yekaterinburg')
-one_day = datetime.timedelta(days=1)
-
-
-def get_week(_date):
-    day_idx = (_date.weekday()) % 7  # turn sunday into 0, monday into 1, etc.
-    monday = _date - datetime.timedelta(days=day_idx)
-    _date = monday
-    for n in range(7):
-        yield _date
-        _date += one_day
 
 
 def general_keyboard():
@@ -44,7 +33,13 @@ def button(day_name, start_date, end_date=None, color='primary'):
             "day_name": day_name, "color": color}
 
 
-def schedule_keyboard():
+def portal_keyboard():
+    return create_keyboard([{'text': 'Расписание заданий'}],
+                            [{'text': 'Сменить данные', "color": 'secondary'},
+                             {'text': 'Выйти', "color": 'secondary'}])
+
+
+def schedule_keyboard(reverse_color=False):
     buttons_arr = schedule_keyboard_obj()
 
     return create_keyboard(*[[{"text": btn['day_name'],
