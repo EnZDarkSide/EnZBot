@@ -2,7 +2,7 @@ import src.database.enitities
 
 from fuzzywuzzy import process
 from vkbottle.bot import Message, Blueprint
-from vkbottle.branch import ClsBranch, Branch, rule_disposal
+from vkbottle.branch import ClsBranch, Branch, rule_disposal, ExitBranch
 from vkbottle.rule import VBMLRule
 
 from src import messages
@@ -48,4 +48,4 @@ async def update_group(answer: Message):
         return
 
     await answer(messages.done, keyboard=general_keyboard())
-    await bot.branch.exit(answer.peer_id)
+    return ExitBranch()
