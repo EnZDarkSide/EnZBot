@@ -58,6 +58,10 @@ class PortalManager:
         response = await self.move_to(url)
 
         iframe = await self.extract_iframe_html(response, "Выдача, сбор и проверка заданий в режиме онлайн.")
+
+        if not iframe:
+            return []
+
         iframe_parsed = BeautifulSoup(iframe, features="lxml")
 
         result = []
@@ -89,7 +93,12 @@ class PortalManager:
         r = re.compile(f'href.+" title="{to_title}"')
 
         resp_text = await from_response.text()
-        raw_section_link = re.findall(r, resp_text)[0]
+        raw_section_link_arr = re.findall(r, resp_text)
+
+        if not raw_section_link_arr:
+            return None
+
+        raw_section_link = raw_section_link_arr[0]
 
         section_link = re.findall(r'(?<=href=")(.*)(?=\" title)', raw_section_link)[0]
 
@@ -100,6 +109,9 @@ class PortalManager:
         """Получение внутреннего фрейма раздела на портале"""
         # Посылаем запрос на получение раздела
         response = await self.post_section_request(from_response, to_title)
+
+        if not response:
+            return None
 
         # Получаем внутренний фрейм
         tree = html.fromstring(await response.text())
