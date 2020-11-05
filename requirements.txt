@@ -22,3 +22,4 @@ beautifulsoup4~=4.9.3
 expiringdict~=1.2.1
 vbml~=0.5.93
 aiohttp~=3.6.2
+pandas~=1.1.4
