@@ -18,8 +18,6 @@ bp = Blueprint()
 
 @bp.on.message(text=['Начать'])
 async def send_greetings(answer: Message):
-    await bot.branch.exit(answer.peer_id)
-
     await answer(messages.send_greetings(), keyboard=general_keyboard())
 
     if not src.database.enitities.DBGroups.get(answer.from_id):
