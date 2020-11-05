@@ -108,7 +108,7 @@ async def p_tasks_by_day(answer: Message):
 
     try:
         start_date_str = payload['start_date']
-        start_date = datetime.strptime(start_date_str, "%d.%m.%Y")
+        start_date = datetime.strptime(start_date_str, "%d.%m.%Y").date()
         if answer.text.lower() in ['на след. нед.', 'на нед.']:
             timestamps = pd.date_range(start_date, periods=7, tz=tz).tolist()
             date_list = [d.date() for d in timestamps]
@@ -121,7 +121,7 @@ async def p_tasks_by_day(answer: Message):
         subj_w_tasks = [x for x in subj_w_tasks if x['tasks']]
 
         if not subj_w_tasks:
-            await answer(f'{answer.text.lower()} заданий нет', keyboard=schedule_keyboard())
+            await answer(f'Заданий нет', keyboard=schedule_keyboard())
             return
 
         for i, subj in enumerate(subj_w_tasks):
@@ -130,7 +130,7 @@ async def p_tasks_by_day(answer: Message):
             for task in subj['tasks']:
                 await answer(task.to_str())
 
-        await answer(f'Это все задания {answer.text.lower()}', keyboard=schedule_keyboard())
+        await answer(f'Это все задания', keyboard=schedule_keyboard())
 
     except IndexError:
         await answer('Раздел заданий для этого предмета не открыт', keyboard=schedule_keyboard())

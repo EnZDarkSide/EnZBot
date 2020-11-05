@@ -12,8 +12,8 @@ class SubjTask(object):
     def to_str(self):
         text = f'Название: {self.name}\n' \
                f'Статус: {self.status}\n' \
-               f'Выдано: {self.dueDate}\n' \
-               f'Срок сдачи: {self.openDate}'
+               f'Выдано: {self.openDate}\n' \
+               f'Срок сдачи: {self.dueDate}'
         return text
 
 
