@@ -27,6 +27,12 @@ async def send_greetings(answer: Message):
     await answer('Вы уже вписали свою группу', keyboard=general_keyboard())
 
 
+@bp.on.message(text=['Сменить группу'])
+async def update_group(answer: Message):
+    await answer('Чтобы продолжить, вам нужно вписать группу для расписания')
+    return Branch('groups_update')
+
+
 @bp.branch.cls_branch("groups_update")
 class GroupsUpdate(ClsBranch):
     async def branch(self, answer: Message, *args):

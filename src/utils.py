@@ -13,7 +13,8 @@ locale.setlocale(locale.LC_ALL, 'ru_RU')
 
 
 def general_keyboard():
-    return create_keyboard([{"text": "Расписание"}, {"text": "Портал"}])
+    return create_keyboard([{"text": "Расписание"}, {"text": "Портал"}],
+                           [{"text": "Сменить группу", "color": "secondary"}])
 
 
 def range_menu(arr):
