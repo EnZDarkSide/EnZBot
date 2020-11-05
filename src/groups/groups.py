@@ -30,10 +30,6 @@ async def send_greetings(answer: Message):
 @bp.branch.cls_branch("groups_update")
 class GroupsUpdate(ClsBranch):
     async def branch(self, answer: Message, *args):
-        await answer('Чтобы продолжить, вам нужно вписать группу для расписания')
-
-    @rule_disposal(VBMLRule("<group:str>", lower=True))
-    async def register(self, answer: Message):
         await update_group(answer)
 
 
