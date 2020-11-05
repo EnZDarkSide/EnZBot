@@ -54,4 +54,4 @@ async def update_group(answer: Message):
         return
 
     await answer(messages.done, keyboard=general_keyboard())
-    return ExitBranch()
+    await bp.branch.exit(answer.peer_id)
