@@ -181,17 +181,20 @@ async def portal_data_update(answer: Message, login, password):
 async def get_portal_for_user(answer: Message):
     """Получение менеджера портала для пользователя и занесение его во временный кэш"""
     # Если сессия еще жива, взять из кэша
-    if answer.from_id in portal_users.keys():
-        return portal_users[answer.from_id]
+
+    pm = portal_users.get(answer.from_id)
+    if pm:
+        return pm
 
     user = DBPortal.get(answer.from_id)
+
     if user is None:
         await update_portal_data(answer)
         return None
     else:
-        pp = await PortalManager().create(user[0], user[1])
-        portal_users[answer.from_id] = pp
-        return pp
+        pm = await PortalManager().create(user[0], user[1])
+        portal_users[answer.from_id] = pm
+        return pm
 
 
 async def update_portal_data(answer: Message):
