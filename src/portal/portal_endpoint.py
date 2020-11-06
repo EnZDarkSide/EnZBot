@@ -9,8 +9,8 @@ from vkbottle.rule import VBMLRule
 
 from src import messages
 from src.database.enitities.Portal import DBPortal
-from src.portal.parser import try_login, format_tasks
-from src.portal.utils import get_portal_for_user
+from src.portal.parser import try_login, format_tasks, PortalManager
+from src.portal.utils import portal_users
 from src.utils import general_keyboard, create_keyboard, portal_keyboard, schedule_keyboard, b_arr
 
 from src._date import tz
@@ -56,7 +56,7 @@ class PortalBranch(ClsBranch):
 @bp.branch.cls_branch("portal_tasks")
 class PortalTasks(ClsBranch):
     async def branch(self, answer: Message, *args):
-        await p_tasks_by_day(answer)
+        return await p_tasks_by_day(answer)
 
     @rule_disposal(VBMLRule(["выйти", "назад"], lower=True))
     async def exit_branch(self, answer: Message):
@@ -95,11 +95,15 @@ async def portal_subjects(answer):
 
 async def p_tasks_by_day(answer: Message):
     """Получение всех заданий для предмета на дату"""
+
+    pp = await get_portal_for_user(answer)
+
+    if not pp:
+        return
+
     if answer.text not in b_arr:
         await answer('Воспользуйтесь клавиатурой для выбора даты', keyboard=schedule_keyboard())
         return
-
-    pp = await get_portal_for_user(answer)
 
     await answer(f'Идет загрузка данных из вашего портала...')
 
@@ -174,3 +178,24 @@ async def portal_data_update(answer: Message, login, password):
 
     await answer(messages.done, keyboard=general_keyboard())
     return True
+
+
+async def get_portal_for_user(answer: Message):
+    """Получение менеджера портала для пользователя и занесение его во временный кэш"""
+    # Если сессия еще жива, взять из кэша
+    if answer.from_id in portal_users.keys():
+        return portal_users[answer.from_id]
+
+    user = DBPortal.get(answer.from_id)
+    if user is None:
+        await update_portal_data(answer)
+        return None
+    else:
+        portal_users[answer.from_id] = await PortalManager().create(user[0], user[1])
+        return portal_users[answer.from_id]
+
+
+async def update_portal_data(answer: Message):
+    await answer(f'Похоже, вам нужно указать данные для входа в портал.'
+                 f'Для этого введите через пробел логин и пароль от портала', keyboard=kb_exit)
+    await bp.branch.add(answer.peer_id, 'portal_login')
