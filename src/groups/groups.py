@@ -6,7 +6,6 @@ from vkbottle.branch import ClsBranch, Branch, rule_disposal, ExitBranch
 from vkbottle.rule import VBMLRule
 
 from src import messages
-from src.bot import bot
 from src.schedule import ScheduleManager
 from src.utils import general_keyboard, range_menu, create_keyboard
 
@@ -50,8 +49,13 @@ async def update_group(answer: Message):
     groups_list = schedule.get_list_of_groups(group)
     similar_groups = process.extract(group, groups_list, limit=5)
 
-    if len(groups_list) > 1:
-        src.database.enitities.DBGroups.add_or_update(answer.from_id, answer.text)
+    try:
+        group_index = [a.lower() for a in groups_list].index(group.lower())
+    except ValueError:
+        group_index = -1
+
+    if len(groups_list) >= 1 and group_index != -1:
+        src.database.enitities.DBGroups.add_or_update(answer.from_id, groups_list[group_index])
     else:
         await answer("Похоже, группы с таким именем не существует.")
         if len(similar_groups) > 0:
