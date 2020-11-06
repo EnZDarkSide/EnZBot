@@ -95,6 +95,7 @@ async def portal_subjects(answer):
 
 async def p_tasks_by_day(answer: Message):
     """Получение всех заданий для предмета на дату"""
+    subj_w_tasks = []
 
     pp = await get_portal_for_user(answer)
 
@@ -110,34 +111,31 @@ async def p_tasks_by_day(answer: Message):
     payload = answer.get_payload_json()
     subjects = await pp.get_subjects()
 
+    start_date_str = payload['start_date']
+    start_date = datetime.strptime(start_date_str, "%d.%m.%Y").date()
+    dates = [start_date]
+
+    if answer.text.lower() in ['на след. нед.', 'на нед.']:
+        timestamps = pd.date_range(start_date, periods=7, tz=tz).tolist()
+        dates = [d.date() for d in timestamps]
+
     try:
-        start_date_str = payload['start_date']
-        start_date = datetime.strptime(start_date_str, "%d.%m.%Y").date()
-        if answer.text.lower() in ['на след. нед.', 'на нед.']:
-            timestamps = pd.date_range(start_date, periods=7, tz=tz).tolist()
-            date_list = [d.date() for d in timestamps]
-            subj_w_tasks = [{'subject': subject.name, 'tasks': subject.get_by_date_arr(date_list)}
-                            for subject in subjects]
-        else:
-            subj_w_tasks = [{'subject': subject.name, 'tasks': subject.get_by_date_arr([start_date])}
-                            for subject in subjects]
-
-        subj_w_tasks = [x for x in subj_w_tasks if x['tasks']]
-
-        if not subj_w_tasks:
-            await answer(f'Заданий нет', keyboard=schedule_keyboard())
-            return
-
-        for i, subj in enumerate(subj_w_tasks):
-            await answer(f'{"_"*15}\nПредмет: {subj["subject"]}')
-
-            for task in subj['tasks']:
-                await answer(task.to_str())
-
-        await answer(f'Это все задания', keyboard=schedule_keyboard())
-
+        subj_w_tasks = [x for x in [{'subject': subject.name, 'tasks': subject.get_by_date_arr(dates)}
+                        for subject in subjects] if x['tasks']]
     except IndexError:
         await answer('Раздел заданий для этого предмета не открыт', keyboard=schedule_keyboard())
+
+    if not subj_w_tasks:
+        await answer(f'Заданий нет', keyboard=schedule_keyboard())
+        return
+
+    for i, subj in enumerate(subj_w_tasks):
+        await answer(f'{"_"*15}\nПредмет: {subj["subject"]}')
+
+        for task in subj['tasks']:
+            await answer(task.to_str())
+
+    await answer(f'Это все задания', keyboard=schedule_keyboard())
 
 
 async def portal_tasks(answer: Message, subject_number: int):
@@ -191,8 +189,9 @@ async def get_portal_for_user(answer: Message):
         await update_portal_data(answer)
         return None
     else:
-        portal_users[answer.from_id] = await PortalManager().create(user[0], user[1])
-        return portal_users[answer.from_id]
+        pp = await PortalManager().create(user[0], user[1])
+        portal_users[answer.from_id] = pp
+        return pp
 
 
 async def update_portal_data(answer: Message):
