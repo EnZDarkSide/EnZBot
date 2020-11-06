@@ -8,12 +8,13 @@ from vkbottle.rule import VBMLRule
 from src import messages
 from src.bot import bot
 from src.schedule import ScheduleManager
-from src.utils import general_keyboard, range_menu
+from src.utils import general_keyboard, range_menu, create_keyboard
 
 schedule = ScheduleManager().schedules["УрГЭУ"]
 
-
 bp = Blueprint()
+
+kb_exit = create_keyboard([{'text': 'Выйти'}])
 
 
 @bp.on.message(text=['Начать'])
@@ -28,8 +29,8 @@ async def send_greetings(answer: Message):
 
 
 @bp.on.message(text=['Сменить группу'])
-async def update_group(answer: Message):
-    await answer('Чтобы продолжить, вам нужно вписать группу для расписания')
+async def change_group(answer: Message):
+    await answer('Чтобы продолжить, вам нужно вписать группу для расписания', keyboard=kb_exit)
     return Branch('groups_update')
 
 
@@ -38,13 +39,18 @@ class GroupsUpdate(ClsBranch):
     async def branch(self, answer: Message, *args):
         await update_group(answer)
 
+    @rule_disposal(VBMLRule(["выйти", "назад"], lower=True))
+    async def exit_branch(self, answer: Message):
+        await answer("Возвращаемся", keyboard=general_keyboard())
+        return ExitBranch()
+
 
 async def update_group(answer: Message):
     group = answer.text
     groups_list = schedule.get_list_of_groups(group)
     similar_groups = process.extract(group, groups_list, limit=5)
 
-    if len(groups_list) == 1:
+    if len(groups_list) > 1:
         src.database.enitities.DBGroups.add_or_update(answer.from_id, answer.text)
     else:
         await answer("Похоже, группы с таким именем не существует.")
