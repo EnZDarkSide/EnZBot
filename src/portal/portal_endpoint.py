@@ -77,7 +77,7 @@ class PortalUserLogin(ClsBranch):
 
     @rule_disposal(VBMLRule("выйти", lower=True))
     async def exit_branch(self, answer: Message):
-        await answer("Возвращаемся", keyboard=general_keyboard())
+        await answer("Возвращаемся", keyboard=portal_keyboard())
         return Branch("portal_menu")
 
 
