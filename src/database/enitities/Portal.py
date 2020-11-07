@@ -10,12 +10,7 @@ class DBPortal:
 
     @staticmethod
     def get(user_id):
-        DB.exec_command(f'SELECT Login, Password, Subjects FROM portal WHERE UserId={user_id}', False)
-        return cur.fetchone()
-
-    @staticmethod
-    def get_subjects(user_id) -> str:
-        DB.exec_command(f'SELECT Subjects FROM portal WHERE UserId={user_id}', False)
+        DB.exec_command(f'SELECT Login, Password FROM portal WHERE UserId={user_id}', False)
         return cur.fetchone()
 
     @staticmethod
@@ -30,3 +25,13 @@ class DBPortal:
         subj_str = ','.join(subjects)
         command = f"UPDATE portal SET Subjects='{subj_str}' WHERE UserId='{user_id}'"
         return DB.exec_command(command)
+
+    @staticmethod
+    def get_hint_shown(user_id):
+        DB.exec_command(f'SELECT HintShown FROM portal WHERE UserId={user_id}', False)
+        return cur.fetchone()
+
+    @staticmethod
+    def set_hint_shown(user_id):
+        DB.exec_command(f'UPDATE portal SET HintShown=1 WHERE UserId={user_id}')
+        return cur.fetchone()

@@ -193,9 +193,11 @@ async def get_portal_for_user(answer: Message):
         return None
     else:
         await answer(f'Идет загрузка данных из вашего портала...')
-        await answer(f'Подсказка: Обычно загрузка занимает 3-12 секунд. Чтобы загрузка шла быстрее, нужно'
-                     f' убрать из видимых сайтов те предметы, которые больше не идут.'
-                     f'\nЭто можно сделать в разделе "Мои настройки" на портале')
+        if DBPortal.get_hint_shown(answer.from_id)[0] == 0:
+            await answer(f'Подсказка: Обычно загрузка занимает 3-12 секунд. Чтобы загрузка шла быстрее, нужно'
+                         f' убрать из видимых сайтов те предметы, которые больше не идут.'
+                         f'\nЭто можно сделать в разделе "Мои настройки" на портале')
+            DBPortal.set_hint_shown(answer.from_id)
         pm = await PortalManager().create(user[0], user[1])
         portal_users[answer.from_id] = pm
         return pm
