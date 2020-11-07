@@ -175,6 +175,7 @@ async def portal_data_update(answer: Message, login, password):
         return False
 
     await answer(messages.done, keyboard=schedule_keyboard())
+    await get_portal_for_user(answer)
     return True
 
 
