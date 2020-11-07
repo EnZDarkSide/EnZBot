@@ -73,7 +73,7 @@ class PortalUserLogin(ClsBranch):
     @rule_disposal(VBMLRule("<login> <password>", lower=True))
     async def register(self, answer: Message, login, password):
         if await portal_data_update(answer, login, password):
-            return Branch('portal_menu')
+            return Branch('portal_tasks')
 
     @rule_disposal(VBMLRule("выйти", lower=True))
     async def exit_branch(self, answer: Message):
@@ -174,7 +174,7 @@ async def portal_data_update(answer: Message, login, password):
                      ' Попробуйте снова', kb_exit)
         return False
 
-    await answer(messages.done, keyboard=general_keyboard())
+    await answer(messages.done, keyboard=schedule_keyboard())
     return True
 
 
