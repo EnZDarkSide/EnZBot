@@ -36,8 +36,8 @@ def button(day_name, start_date, end_date=None, color='primary'):
 
 def portal_keyboard():
     return create_keyboard([{'text': 'Расписание заданий'}],
-                            [{'text': 'Сменить данные', "color": 'secondary'},
-                             {'text': 'Выйти', "color": 'secondary'}])
+                           [{'text': 'Сменить данные', "color": 'secondary'},
+                            {'text': 'Выйти', "color": 'secondary'}])
 
 
 def schedule_keyboard(reverse_color=False):
@@ -75,12 +75,12 @@ def schedule_keyboard_obj():
     return buttons_arr
 
 
+def get_b_arr():
+    return list(itertools.chain(*[[btn['day_name'] for btn in row] for row in schedule_keyboard_obj()]))
+
+
 def local_dt_now():
     return datetime.datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(tz)
-
-
-# Список всех кнопок
-b_arr = list(itertools.chain(*[[btn['day_name'] for btn in row] for row in schedule_keyboard_obj()]))
 
 
 def address_menu():

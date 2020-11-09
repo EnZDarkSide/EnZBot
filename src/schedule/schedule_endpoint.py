@@ -7,7 +7,7 @@ from vkbottle.framework.framework.rule import VBMLRule
 from src import utils
 from src.database.enitities.Groups import DBGroups
 from src.schedule import ScheduleManager
-from src.utils import general_keyboard, b_arr
+from src.utils import general_keyboard
 
 schedule = ScheduleManager().schedules['УрГЭУ']
 
@@ -30,7 +30,7 @@ class PortalBranch(ClsBranch):
 
         group = request[0]
 
-        if answer.text in b_arr:
+        if answer.text in utils.get_b_arr():
             pl = json.loads(answer.payload)
             result = schedule.get_schedule(group, pl['start_date'], pl['end_date'])
             for r in result:

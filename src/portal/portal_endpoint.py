@@ -11,7 +11,7 @@ from src import messages
 from src.database.enitities.Portal import DBPortal
 from src.portal.parser import try_login, format_tasks, PortalManager
 from src.portal.utils import portal_users
-from src.utils import general_keyboard, create_keyboard, portal_keyboard, schedule_keyboard, b_arr
+from src.utils import general_keyboard, create_keyboard, portal_keyboard, schedule_keyboard, get_b_arr
 
 from src._date import tz
 
@@ -102,11 +102,9 @@ async def p_tasks_by_day(answer: Message):
     if not pp:
         return
 
-    if answer.text not in b_arr:
+    if answer.text not in get_b_arr():
         await answer('Воспользуйтесь клавиатурой для выбора даты', keyboard=schedule_keyboard())
         return
-
-
 
     payload = answer.get_payload_json()
     subjects = await pp.get_subjects()
