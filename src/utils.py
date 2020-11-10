@@ -26,12 +26,15 @@ def trams_keyboard():
                            [{"text": 'Главное меню', "color": "secondary"}])
 
 
-def button(day_name, start_date, end_date=None, color='primary'):
+def button(day_name, start_date, end_date=None, btn_name=None, color='primary'):
     if end_date is None:
         end_date = start_date
 
+    if not btn_name:
+        btn_name = day_name
+
     return {"start_date": start_date.strftime("%d.%m.%Y"), "end_date": end_date.strftime("%d.%m.%Y"),
-            "day_name": day_name, "color": color}
+            "day_name": day_name, "btn_name": btn_name, "color": color}
 
 
 def portal_keyboard():
@@ -40,12 +43,11 @@ def portal_keyboard():
                             {'text': 'Выйти', "color": 'secondary'}])
 
 
-def schedule_keyboard(reverse_color=False):
+def schedule_keyboard():
     buttons_arr = schedule_keyboard_obj()
 
-    return create_keyboard(*[[{"text": btn['day_name'],
-                               "payload": json.dumps(btn),
-                               "color": 'positive' if btn['day_name'] == 'Сегодня' else btn['color']}
+    return create_keyboard(*[[{"text": btn['btn_name'],
+                               "color": 'positive' if btn['btn_name'] == 'Сегодня' else btn['color']}
                               for btn in split] for split in buttons_arr], [{"text": 'Назад', "color": 'secondary'}])
 
 
@@ -59,7 +61,9 @@ def schedule_keyboard_obj():
 
     for d in week_dates:
         buttons.append(button(
-            calendar.day_name[d.weekday()].capitalize() if d.weekday() != today_index else 'Сегодня', d, d))
+            calendar.day_name[d.weekday()].capitalize(),
+            d, d,
+            calendar.day_name[d.weekday()].capitalize() if d.weekday() != today_index else 'Сегодня'))
 
     tomorrow_date = dt.now() + datetime.timedelta(days=1)
 
@@ -67,16 +71,23 @@ def schedule_keyboard_obj():
 
     top_buttons = [
         button('Завтра', tomorrow_date, tomorrow_date),
-        button('На нед.', week_dates[0], week_dates[6], 'secondary'),
-        button('На след. нед.', next_week[0], next_week[6], 'secondary')
+        button('На нед.', week_dates[0], week_dates[6], None, 'secondary'),
+        button('На след. нед.', next_week[0], next_week[6], None, 'secondary')
     ]
 
     buttons_arr = [top_buttons, buttons[3:6], buttons[:3]]
     return buttons_arr
 
 
-def get_b_arr():
-    return list(itertools.chain(*[[btn['day_name'] for btn in row] for row in schedule_keyboard_obj()]))
+def get_schedule_buttons(add_today=False):
+    _list = list(itertools.chain(*[[btn for btn in row] for row in schedule_keyboard_obj()]))
+    _dict = {btn['day_name']: btn for btn in _list}
+
+    if add_today:
+        today_button = [btn for btn in _list if btn['btn_name'] == 'Сегодня']
+        _dict['Сегодня'] = today_button[0]
+
+    return _dict
 
 
 def local_dt_now():
@@ -99,3 +110,6 @@ def create_keyboard(*rows):
         one_time=True
     )
     return keyboard
+
+
+kb_exit = create_keyboard([{'text': 'Выйти'}])

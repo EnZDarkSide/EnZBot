@@ -1,4 +1,5 @@
 import json
+import datetime
 
 from vkbottle.bot import Message, Blueprint
 from vkbottle.branch import Branch, ClsBranch, rule_disposal, ExitBranch
@@ -30,9 +31,12 @@ class PortalBranch(ClsBranch):
 
         group = request[0]
 
-        if answer.text in utils.get_b_arr():
-            pl = json.loads(answer.payload)
-            result = schedule.get_schedule(group, pl['start_date'], pl['end_date'])
+        buttons_dict = utils.get_schedule_buttons(add_today=True)
+
+        if answer.text in buttons_dict.keys():
+            button = buttons_dict[answer.text]
+
+            result = schedule.get_schedule(group, button['start_date'], button['end_date'])
             for r in result:
                 await answer(r, keyboard=utils.schedule_keyboard())
         else:

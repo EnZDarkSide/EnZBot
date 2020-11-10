@@ -7,11 +7,11 @@ from vkbottle.branch import ClsBranch, ExitBranch, Branch
 from vkbottle.branch import rule_disposal
 from vkbottle.rule import VBMLRule
 
-from src import messages
+from src import messages, utils
 from src.database.enitities.Portal import DBPortal
 from src.portal.parser import try_login, format_tasks, PortalManager
 from src.portal.utils import portal_users
-from src.utils import general_keyboard, create_keyboard, portal_keyboard, schedule_keyboard, get_b_arr
+from src.utils import general_keyboard, create_keyboard, portal_keyboard, schedule_keyboard, get_schedule_buttons
 
 from src._date import tz
 
@@ -102,14 +102,17 @@ async def p_tasks_by_day(answer: Message):
     if not pp:
         return
 
-    if answer.text not in get_b_arr():
+    buttons_dict = utils.get_schedule_buttons(add_today=True)
+
+    if answer.text not in buttons_dict.keys():
         await answer('Воспользуйтесь клавиатурой для выбора даты', keyboard=schedule_keyboard())
         return
 
-    payload = answer.get_payload_json()
+    button = buttons_dict[answer.text]
+
     subjects = await pp.get_subjects()
 
-    start_date_str = payload['start_date']
+    start_date_str = button['start_date']
     start_date = datetime.strptime(start_date_str, "%d.%m.%Y").date()
     dates = [start_date]
 
