@@ -1,7 +1,7 @@
 import calendar
 import datetime
 import itertools
-import json
+import pendulum
 import locale
 
 import pytz
@@ -91,7 +91,11 @@ def get_schedule_buttons(add_today=False):
 
 
 def local_dt_now():
-    return datetime.datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(tz)
+    return pendulum.now('Asia/Yekaterinburg')
+
+    # date = datetime.datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(tz)
+    # print(date)
+    # return date
 
 
 def address_menu():

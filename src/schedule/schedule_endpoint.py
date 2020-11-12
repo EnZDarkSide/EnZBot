@@ -8,7 +8,7 @@ from vkbottle.framework.framework.rule import VBMLRule
 from src import utils
 from src.database.enitities.Groups import DBGroups
 from src.schedule import ScheduleManager
-from src.utils import general_keyboard
+from src.utils import general_keyboard, local_dt_now
 
 schedule = ScheduleManager().schedules['УрГЭУ']
 
@@ -39,6 +39,8 @@ class PortalBranch(ClsBranch):
             result = schedule.get_schedule(group, button['start_date'], button['end_date'])
             for r in result:
                 await answer(r, keyboard=utils.schedule_keyboard())
+        elif answer.text == 'debug':
+            await answer(f'{local_dt_now()}', keyboard=utils.schedule_keyboard())
         else:
             await answer("Шо? Нипонял (пасхалка найдена)", keyboard=utils.schedule_keyboard())
 
