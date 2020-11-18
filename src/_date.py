@@ -1,4 +1,5 @@
 import datetime
+import pendulum
 
 from pytz import timezone
 
@@ -7,7 +8,7 @@ one_day = datetime.timedelta(days=1)
 
 
 def get_week(_date):
-    day_idx = (_date.weekday()) % 7  # turn sunday into 0, monday into 1, etc.
+    day_idx = (_date.weekday()) % 7  # monday into 0, etc.
     monday = _date - datetime.timedelta(days=day_idx)
     _date = monday
     for n in range(7):
