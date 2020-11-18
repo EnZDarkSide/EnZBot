@@ -52,22 +52,23 @@ def schedule_keyboard():
 
 
 def schedule_keyboard_obj():
-    dt = local_dt_now()
+    dt = pendulum.now('Asia/Yekaterinburg')
 
-    today_index = dt.today().weekday()
-    week_dates = list(get_week(dt.now().date()))
+    print(f'dt = {dt}')
 
-    buttons = []
+    today_index = dt.weekday()
+    week_dates = list(get_week(dt.date()))
 
-    for d in week_dates:
-        buttons.append(button(
+    buttons = [
+        button(
             calendar.day_name[d.weekday()].capitalize(),
             d, d,
-            calendar.day_name[d.weekday()].capitalize() if d.weekday() != today_index else 'Сегодня'))
+            calendar.day_name[d.weekday()].capitalize() if d.weekday() != today_index else 'Сегодня') for d in
+        week_dates]
 
     tomorrow_date = dt.now() + datetime.timedelta(days=1)
 
-    next_week = list(get_week(dt.now().date() + datetime.timedelta(days=7)))
+    next_week = list(get_week(dt.date() + datetime.timedelta(days=7)))
 
     top_buttons = [
         button('Завтра', tomorrow_date, tomorrow_date),
@@ -85,17 +86,12 @@ def get_schedule_buttons(add_today=False):
 
     if add_today:
         today_button = [btn for btn in _list if btn['btn_name'] == 'Сегодня']
-        _dict['Сегодня'] = today_button[0]
+        if today_button:
+            _dict['Сегодня'] = today_button[0]
+
+    print('/n'.join(_dict))
 
     return _dict
-
-
-def local_dt_now():
-    return pendulum.now('Asia/Yekaterinburg')
-
-    # date = datetime.datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(tz)
-    # print(date)
-    # return date
 
 
 def address_menu():

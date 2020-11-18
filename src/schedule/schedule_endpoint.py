@@ -8,7 +8,7 @@ from vkbottle.framework.framework.rule import VBMLRule
 from src import utils
 from src.database.enitities.Groups import DBGroups
 from src.schedule import ScheduleManager
-from src.utils import general_keyboard, local_dt_now
+from src.utils import general_keyboard
 
 schedule = ScheduleManager().schedules['УрГЭУ']
 
@@ -25,9 +25,6 @@ async def get_schedule(answer: Message):
 class PortalBranch(ClsBranch):
     async def branch(self, answer: Message, *args):
         request = DBGroups.get(answer.from_id)
-
-        if request is None:
-            await answer(f'Ошибка, {request}', keyboard=utils.schedule_keyboard())
 
         group = request[0]
 

@@ -7,7 +7,6 @@ pattern = Pattern('mysql://<login>:<pass>@<host>/<database>?reconnect=true')
 
 
 def get_local_con():
-
     return pymysql.connect(host='localhost', user='enzbot', password='password',
                            db='enzbotdb')
 
