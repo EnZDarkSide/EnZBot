@@ -37,7 +37,7 @@ class PortalBranch(ClsBranch):
             for r in result:
                 await answer(r, keyboard=utils.schedule_keyboard())
         elif answer.text == 'debug':
-            str = '\n'.join(buttons_dict)
+            str = '\n'.join([f'{btn}: {btn["start_date"]}' for btn in buttons_dict])
             await answer(f'{str}', keyboard=utils.schedule_keyboard())
         else:
             await answer("Шо? Нипонял (пасхалка найдена)", keyboard=utils.schedule_keyboard())
