@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 import requests
+import random
 
 
 class ScheduleUSUE:
@@ -14,10 +15,12 @@ class ScheduleUSUE:
         start_date = datetime.today().strftime('%d.%m.%Y') if start_date == '' else start_date
         end_date = datetime.today().strftime('%d.%m.%Y') if end_date == '' else end_date
 
-        response = requests.get(f'https://www.usue.ru/schedule/?t=0.06252316824592485&action=show'
+        response = requests.get(f'https://www.usue.ru/schedule/?t={random.random()}&action=show'
                                 f'&startDate={start_date}'
                                 f'&endDate={end_date}'
                                 f'&group={group}')
+
+        print(response.url)
 
         return ScheduleUSUE.format(json.loads(response.text))
 
