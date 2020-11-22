@@ -3,7 +3,9 @@ from src.portal.portal_endpoint import bp as portal_bp
 from src.schedule.schedule_endpoint import bp as schedule_bp
 from src.groups.groups import bp as groups_bp
 
-API_TOKEN = "***REMOVED***"
+import os
+
+API_TOKEN = os.environ['API_TOKEN']
 
 bot = Bot(API_TOKEN)
 

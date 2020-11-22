@@ -1,6 +1,3 @@
-import json
-import datetime
-
 from vkbottle.bot import Message, Blueprint
 from vkbottle.branch import Branch, ClsBranch, rule_disposal, ExitBranch
 from vkbottle.framework.framework.rule import VBMLRule
