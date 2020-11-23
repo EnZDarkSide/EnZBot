@@ -66,7 +66,7 @@ def schedule_keyboard_obj():
             calendar.day_name[d.weekday()].capitalize() if d.weekday() != today_index else 'Сегодня') for d in
         week_dates]
 
-    tomorrow_date = dt.now() + datetime.timedelta(days=1)
+    tomorrow_date = dt.date() + datetime.timedelta(days=1)
 
     next_week = list(get_week(dt.date() + datetime.timedelta(days=7)))
 
