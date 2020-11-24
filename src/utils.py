@@ -14,7 +14,8 @@ locale.setlocale(locale.LC_ALL, 'ru_RU')
 
 def general_keyboard():
     return create_keyboard([{"text": "Расписание"}, {"text": "Портал"}],
-                           [{"text": "Сменить группу", "color": "secondary"}])
+                           [{"text": "Где трамваи?", 'color': 'secondary'},
+                            {"text": "Сменить группу", "color": "secondary"}])
 
 
 def range_menu(arr):
@@ -22,8 +23,11 @@ def range_menu(arr):
 
 
 def trams_keyboard():
-    return create_keyboard([{"text": 'Обновить данные'}, {"text": 'Указать адрес'}],
-                           [{"text": 'Главное меню', "color": "secondary"}])
+    return create_keyboard([{"text": 'От Умельцев до УрГЭУ', 'color': 'positive'},
+                            {"text": 'От УрГЭУ до Умельцев', 'color': 'positive'}],
+
+                           [{"text": 'Указать адрес', "color": "negative"},
+                            {'text': 'Выйти', 'color': 'secondary'}])
 
 
 def button(day_name, start_date, end_date=None, btn_name=None, color='primary'):
@@ -98,7 +102,7 @@ def address_menu():
     return create_keyboard([{"text": 'Назад'}])
 
 
-def create_keyboard(*rows):
+def create_keyboard(*rows, one_time=False):
     keyboard = keyboard_gen(
         [
             [{"text": button["text"],
@@ -107,7 +111,7 @@ def create_keyboard(*rows):
               "type": button["type"] if "type" in button else "text"} for button in row]
             for row in rows
         ],
-        one_time=True
+        one_time=one_time
     )
     return keyboard
 

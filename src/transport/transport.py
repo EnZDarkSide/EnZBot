@@ -24,6 +24,16 @@ class Transport:
         return filter(lambda tram: tram.number in (14, 25, 27), trams)
 
     @staticmethod
+    def from_dorm_to_university():
+        trams = parser.get_trams(4350)
+        return trams
+
+    @staticmethod
+    def from_university_to_dorm():
+        trams = parser.get_trams(3473)
+        return list(filter(lambda tram: tram.number in ['14', '25', '27'], trams))
+
+    @staticmethod
     def get_directions(tram_stop: str) -> List[str]:
         tram_stop = tram_stop.lower()
 
