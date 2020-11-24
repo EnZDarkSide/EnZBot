@@ -26,6 +26,9 @@ class PortalBranch(ClsBranch):
             f'{tram.number}: {tram.arrival_time} [{tram.arrival_distance}]' for tram in trams
         ])
 
+        if not trams_str:
+            await answer('Трамваев нет', keyboard=trams_keyboard())
+
         await answer(trams_str, keyboard=trams_keyboard())
 
     @rule_disposal(VBMLRule("От УрГЭУ до Умельцев", lower=True))
@@ -35,6 +38,9 @@ class PortalBranch(ClsBranch):
         trams_str = '\n'.join([
             f'{tram.number}: {tram.arrival_time} [{tram.arrival_distance}]' for tram in trams
         ])
+
+        if not trams_str:
+            await answer('Трамваев нет', keyboard=trams_keyboard())
 
         await answer(trams_str, keyboard=trams_keyboard())
 
