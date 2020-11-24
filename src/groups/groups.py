@@ -18,7 +18,7 @@ kb_exit = create_keyboard([{'text': 'Выйти'}])
 
 @bp.on.message(text=['Начать'])
 async def send_greetings(answer: Message):
-    await answer(messages.send_greetings(), keyboard=general_keyboard())
+    await answer(messages.send_greetings())
 
     if not src.database.enitities.DBGroups.get(answer.from_id):
         await answer('Чтобы продолжить, вам нужно вписать группу для расписания')
