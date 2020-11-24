@@ -70,7 +70,7 @@ class PortalUserLogin(ClsBranch):
         await answer('Ваших учетных данных нет в базе. Введите логин и пароль от портала,'
                      ' чтобы иметь доступ к заданиям из бота', keyboard=kb_exit)
 
-    @rule_disposal(VBMLRule("<login> <password>", lower=True))
+    @rule_disposal(VBMLRule("<login><!><password>", lower=True))
     async def register(self, answer: Message, login, password):
         if await portal_data_update(answer, login, password):
             return Branch('portal_tasks')
