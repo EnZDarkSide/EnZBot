@@ -24,3 +24,4 @@ vbml~=0.5.93
 aiohttp~=3.6.2
 pandas~=1.1.4
 pendulum~=2.1.2
+schedule~=0.6.0
