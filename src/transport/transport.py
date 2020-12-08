@@ -2,7 +2,7 @@ import re
 from typing import List, Iterator
 
 from .parser import TramParser
-from .tram import Tram
+from src.transport.entities.tram import Tram
 
 parser = TramParser()
 

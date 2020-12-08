@@ -4,7 +4,7 @@ from typing import Set, Tuple
 import requests
 from lxml import html
 
-from src.transport.tram import Tram
+from src.transport.entities.tram import Tram
 
 
 class TramParser:
