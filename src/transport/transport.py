@@ -3,6 +3,7 @@ from typing import List, Iterator
 
 from .parser import TramParser
 from src.transport.entities.tram import Tram
+from ..database.enitities.Transport import DBTransport
 
 parser = TramParser()
 
@@ -12,7 +13,9 @@ class Transport:
     @staticmethod
     def stop_exists(stop: str) -> bool:
         stop = stop.lower()
-        stops = map(lambda stop: stop.lower(), parser.get_stops(stop[0]))
+        stop_first_letter = stop[0]
+
+        stops = map(lambda stop: stop.lower(), parser.get_stops(stop_first_letter))
 
         return stop in stops
 
@@ -40,8 +43,12 @@ class Transport:
         directions = []
         for tram_stop_with_direction in parser.get_raw_stops(tram_stop[0]):
             direction_match = re.match(rf'^{tram_stop} \(([^)]+)\)$', tram_stop_with_direction,
-                                        flags=re.IGNORECASE)
+                                       flags=re.IGNORECASE)
             if direction_match:
                 directions.append(direction_match.group(1))
 
         return directions
+
+    @staticmethod
+    def save_home_tram_stop_id(user_id: int, home_tram_stop_id: int):
+        DBTransport.save_home_stop_id(user_id, home_tram_stop_id)
