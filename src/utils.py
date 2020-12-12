@@ -1,6 +1,8 @@
 import calendar
 import datetime
 import itertools
+from typing import Union, Tuple, List, Set
+
 import pendulum
 import locale
 
@@ -117,3 +119,12 @@ def create_keyboard(*rows, one_time=False):
 
 
 kb_exit = create_keyboard([{'text': 'Выйти'}])
+
+
+def iterable_to_string(iterable: Union[Tuple, List, Set]) -> str:
+    string: str = ''
+
+    for item in iterable:
+        string += item + '\n'
+
+    return string
