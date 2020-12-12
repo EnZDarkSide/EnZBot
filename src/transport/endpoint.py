@@ -6,7 +6,7 @@ from vkbottle.branch import rule_disposal
 from vkbottle.rule import VBMLRule
 
 from src import messages
-from src.transport import Transport
+from src.transport import Transport, branches
 from src.transport.entities.stop import Stop
 from src.utils import trams_keyboard, general_keyboard, iterable_to_string
 
@@ -16,10 +16,10 @@ bp = Blueprint()
 @bp.on.message(text=['Где трамваи?', 'Т'])
 async def portal(answer: Message):
     await answer('Меню трамваев', keyboard=trams_keyboard())
-    return Branch('trams_menu')
+    return Branch(branches.trams_menu)
 
 
-@bp.branch.cls_branch("trams_menu")
+@bp.branch.cls_branch(branches.trams_menu)
 class PortalBranch(ClsBranch):
 
     @rule_disposal(VBMLRule("От Умельцев до УрГЭУ", lower=True))
@@ -51,7 +51,7 @@ class PortalBranch(ClsBranch):
     @rule_disposal(VBMLRule("Указать адрес", lower=True))
     async def select_stop(self, answer: Message):
         await answer(messages.getting_home_stop_first_letter)
-        return Branch('adding-home-tram-stop')
+        return Branch(branches.adding_tram_stop)
 
     @rule_disposal(VBMLRule("выйти", lower=True))
     async def exit_branch(self, answer: Message):
@@ -59,8 +59,8 @@ class PortalBranch(ClsBranch):
         return ExitBranch()
 
 
-@bp.branch.cls_branch('adding-home-tram-stop')
-class AddingHomeTramStopBranch(ClsBranch):
+@bp.branch.cls_branch(branches.adding_tram_stop)
+class AddingTramStopBranch(ClsBranch):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
