@@ -8,7 +8,7 @@ from vkbottle.rule import VBMLRule
 from src import messages
 from src.transport import Transport, branches
 from src.transport.entities.stop import Stop
-from src.utils import trams_keyboard, general_keyboard, iterable_to_string
+from src.utils import trams_keyboard, general_keyboard, iterable_to_string, StopType
 
 bp = Blueprint()
 
@@ -64,6 +64,7 @@ class AddingTramStopBranch(ClsBranch):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        self.stop_type: StopType = StopType.HOME
         self.stops: Tuple[Stop] = tuple()
 
     # выполняется, когда ответ — первая цифра или буква остановки
@@ -83,12 +84,17 @@ class AddingTramStopBranch(ClsBranch):
         stops: Tuple[Stop] = tuple(filter(lambda stop: stop.name.lower() == stop_name, self.stops))
 
         if stops:
-            Transport.save_home_tram_stop_id(answer.id, stops[0].id)
+            Transport.save_tram_stop_id(answer.id, stops[0].id, self.stop_type)
+
             await answer(messages.done)
+            await answer(messages.getting_university_stop_first_letter)
+
+            if self.stop_type == StopType.HOME:
+                self.stop_type = StopType.UNIVERSITY
+            else:
+                return ExitBranch()
         else:
             await answer(messages.error)
-
-        return Branch('adding-university-tram-stop')
 
     @rule_disposal(VBMLRule("выйти", lower=True))
     async def exit_branch(self, answer: Message):

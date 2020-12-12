@@ -5,6 +5,7 @@ from .entities.tram import Tram
 from .entities.stop import Stop
 from .parser import TramParser
 from ..database.enitities.Transport import DBTransport
+from ..utils import StopType
 
 parser = TramParser()
 
@@ -72,5 +73,8 @@ class Transport:
         return directions
 
     @staticmethod
-    def save_home_tram_stop_id(user_id: int, home_tram_stop_id: int):
-        DBTransport.save_home_stop_id(user_id, home_tram_stop_id)
+    def save_tram_stop_id(user_id: int, tram_stop_id: int, stop_type: StopType):
+        if stop_type == StopType.HOME:
+            DBTransport.save_home_stop_id(user_id, tram_stop_id)
+        else:
+            DBTransport.save_university_stop_id(user_id, tram_stop_id)

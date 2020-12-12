@@ -1,6 +1,7 @@
 import calendar
 import datetime
 import itertools
+from enum import Enum
 from typing import Union, Tuple, List, Set
 
 import pendulum
@@ -128,3 +129,8 @@ def iterable_to_string(iterable: Union[Tuple, List, Set]) -> str:
         string += item + '\n'
 
     return string
+
+
+class StopType(Enum):
+    HOME = 'home'
+    UNIVERSITY = 'university'
