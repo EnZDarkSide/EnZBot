@@ -5,11 +5,11 @@ from vkbottle.branch import ClsBranch, ExitBranch, Branch
 from vkbottle.branch import rule_disposal
 from vkbottle.rule import VBMLRule
 
-from src.other import handlers, messages
-from src.transport import Transport, branches
+from src.other import handlers, messages, branches
+from src.other.utils import trams_keyboard, general_keyboard, iterable_to_string, StopType
+from src.transport import Transport
 from src.transport.entities.stop import Stop
 from src.transport.entities.tram import Tram
-from src.other.utils import trams_keyboard, general_keyboard, iterable_to_string, StopType
 
 bp = Blueprint()
 
@@ -21,7 +21,7 @@ async def portal(answer: Message):
 
 
 @bp.branch.cls_branch(branches.trams_menu)
-class PortalBranch(ClsBranch):
+class TramsMenuBranch(ClsBranch):
 
     @rule_disposal(VBMLRule(handlers.show_home_tram_stops, lower=True))
     async def go_to_university(self, answer: Message):
@@ -29,7 +29,7 @@ class PortalBranch(ClsBranch):
 
         message = '\n'.join([
             f'{tram.number}: {tram.arrival_time} [{tram.arrival_distance}]' for tram in trams
-        ]) or 'Трамваев нет'
+        ]) or messages.no_trams
 
         await answer(message, keyboard=trams_keyboard())
 
@@ -39,7 +39,7 @@ class PortalBranch(ClsBranch):
 
         message = '\n'.join([
             f'{tram.number}: {tram.arrival_time} [{tram.arrival_distance}]' for tram in trams
-        ]) or 'Трамваев нет'
+        ]) or messages.no_trams
 
         await answer(message, keyboard=trams_keyboard())
 
@@ -48,9 +48,9 @@ class PortalBranch(ClsBranch):
         await answer(messages.getting_home_stop_first_letter)
         return Branch(branches.adding_tram_stop)
 
-    @rule_disposal(VBMLRule("выйти", lower=True))
+    @rule_disposal(VBMLRule(handlers.exit_branch, lower=True))
     async def exit_branch(self, answer: Message):
-        await answer("Возвращаемся", keyboard=general_keyboard())
+        await answer(messages.resp_show_menu, keyboard=general_keyboard())
         return ExitBranch()
 
 
@@ -63,7 +63,7 @@ class AddingTramStopBranch(ClsBranch):
         self.stops: Tuple[Stop] = tuple()
 
     # выполняется, когда ответ — первая цифра или буква остановки
-    @rule_disposal(VBMLRule(r"^[147А-Я]$", lower=True))
+    @rule_disposal(VBMLRule(handlers.regex_stop_first_letter, lower=True))
     async def show_tram_stops(self, answer: Message):
         self.stops: Tuple[Stop] = Transport.get_stops(answer.text)
         stop_names: Tuple[str] = tuple(map(lambda stop: str(stop.name), self.stops))
@@ -72,7 +72,7 @@ class AddingTramStopBranch(ClsBranch):
         await answer(messages.stop_choice)
 
     # выполняется, когда пользователь написал название остановки
-    @rule_disposal(VBMLRule(r"^[0-9а-я ]+"))
+    @rule_disposal(VBMLRule(handlers.regex_stop_name))
     async def add_stop_id_to_db(self, answer: Message):
         stop_name: str = answer.text.lower()
 
@@ -91,7 +91,7 @@ class AddingTramStopBranch(ClsBranch):
         else:
             await answer(messages.error)
 
-    @rule_disposal(VBMLRule("выйти", lower=True))
+    @rule_disposal(VBMLRule(handlers.exit_branch, lower=True))
     async def exit_branch(self, answer: Message):
         await answer(messages.resp_show_menu, keyboard=general_keyboard())
         return ExitBranch()

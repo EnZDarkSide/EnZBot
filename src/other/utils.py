@@ -29,7 +29,7 @@ def trams_keyboard():
                             {"text": handlers.show_university_tram_stops, 'color': 'positive'}],
 
                            [{"text": handlers.set_tram_stops, "color": "negative"},
-                            {'text': 'Выйти', 'color': 'secondary'}])
+                            {'text': handlers.exit_branch, 'color': 'secondary'}])
 
 
 def button(day_name, start_date, end_date=None, btn_name=None, color='primary'):
