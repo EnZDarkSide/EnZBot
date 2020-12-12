@@ -1,8 +1,9 @@
 import re
-from typing import List, Iterator
+from typing import List, Iterator, Tuple
 
+from .entities.tram import Tram
+from .entities.stop import Stop
 from .parser import TramParser
-from src.transport.entities.tram import Tram
 from ..database.enitities.Transport import DBTransport
 
 parser = TramParser()
@@ -25,6 +26,27 @@ class Transport:
 
         # нужны только трамваи с номерами 14, 25 и 27
         return filter(lambda tram: tram.number in (14, 25, 27), trams)
+
+    @staticmethod
+    def get_stops(stop_first_letter: str) -> Tuple[Stop]:
+        def stop_name_and_direction(raw_stop):
+            stop_match = re.match(rf'^(\d+) \(([^)]+)\)$', tram_stop_with_direction,
+                                  flags=re.IGNORECASE)
+            if stop_match:
+                stop_name = stop_match.group(1)
+                stop_direction = stop_match.group(2)
+
+            return tuple(stop_name, stop_direction)
+
+        raw_stops = parser.get_stops_title_and_id(stop_first_letter)
+
+        stop_names, stop_directions = map(stop_name_and_direction, raw_stops)
+        stop_ids = map(lambda raw_stop: raw_stop[1], raw_stops)
+
+        stops = tuple(map(lambda stop_tuple: Stop(stop_tuple[0], stop_tuple[1], stop_tuple[2]),
+                          zip(stop_ids, stop_names, stop_directions)))
+
+        return stops
 
     @staticmethod
     def from_dorm_to_university():
