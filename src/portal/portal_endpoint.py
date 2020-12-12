@@ -7,11 +7,11 @@ from vkbottle.branch import ClsBranch, ExitBranch, Branch
 from vkbottle.branch import rule_disposal
 from vkbottle.rule import VBMLRule
 
-from src import messages, utils
+from src.other import utils, messages
 from src.database.enitities.Portal import DBPortal
 from src.portal.parser import try_login, format_tasks, PortalManager
 from src.portal.utils import portal_users
-from src.utils import general_keyboard, create_keyboard, portal_keyboard, schedule_keyboard, get_schedule_buttons
+from src.other.utils import general_keyboard, create_keyboard, portal_keyboard, schedule_keyboard
 
 from src._date import tz
 

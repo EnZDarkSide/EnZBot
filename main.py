@@ -2,10 +2,10 @@
 from vkbottle import Message
 from vkbottle.branch import Branch
 
-from src import messages, utils
+from src.other import utils, messages
 from src.bot import bot
 from src.database.enitities import DBGroups
-from src.utils import general_keyboard
+from src.other.utils import general_keyboard
 
 # приветствие
 # добавление нескольких групп

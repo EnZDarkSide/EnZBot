@@ -5,7 +5,7 @@ from .entities.tram import Tram
 from .entities.stop import Stop
 from .parser import TramParser
 from ..database.enitities.Transport import DBTransport
-from ..utils import StopType
+from src.other.utils import StopType
 
 parser = TramParser()
 

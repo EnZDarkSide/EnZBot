@@ -5,11 +5,11 @@ from vkbottle.branch import ClsBranch, ExitBranch, Branch
 from vkbottle.branch import rule_disposal
 from vkbottle.rule import VBMLRule
 
-from src import messages, handlers
+from src.other import handlers, messages
 from src.transport import Transport, branches
 from src.transport.entities.stop import Stop
 from src.transport.entities.tram import Tram
-from src.utils import trams_keyboard, general_keyboard, iterable_to_string, StopType
+from src.other.utils import trams_keyboard, general_keyboard, iterable_to_string, StopType
 
 bp = Blueprint()
 
