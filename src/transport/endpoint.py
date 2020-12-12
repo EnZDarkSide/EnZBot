@@ -1,54 +1,49 @@
-from typing import Tuple
+from typing import Tuple, Iterator
 
 from vkbottle.bot import Message, Blueprint
 from vkbottle.branch import ClsBranch, ExitBranch, Branch
 from vkbottle.branch import rule_disposal
 from vkbottle.rule import VBMLRule
 
-from src import messages
+from src import messages, handlers
 from src.transport import Transport, branches
 from src.transport.entities.stop import Stop
+from src.transport.entities.tram import Tram
 from src.utils import trams_keyboard, general_keyboard, iterable_to_string, StopType
 
 bp = Blueprint()
 
 
-@bp.on.message(text=['Где трамваи?', 'Т'])
+@bp.on.message(text=[handlers.show_trams, handlers.show_trams_short])
 async def portal(answer: Message):
-    await answer('Меню трамваев', keyboard=trams_keyboard())
+    await answer(messages.endpoint_choice, keyboard=trams_keyboard())
     return Branch(branches.trams_menu)
 
 
 @bp.branch.cls_branch(branches.trams_menu)
 class PortalBranch(ClsBranch):
 
-    @rule_disposal(VBMLRule("От Умельцев до УрГЭУ", lower=True))
-    async def from_dorm_to_usue(self, answer: Message):
-        trams = Transport.from_dorm_to_university()
+    @rule_disposal(VBMLRule(handlers.show_home_tram_stops, lower=True))
+    async def go_to_university(self, answer: Message):
+        trams: Iterator[Tram] = Transport.get_trams(answer.id, StopType.HOME)
 
-        trams_str = '\n'.join([
+        message = '\n'.join([
             f'{tram.number}: {tram.arrival_time} [{tram.arrival_distance}]' for tram in trams
-        ])
+        ]) or 'Трамваев нет'
 
-        if not trams_str:
-            await answer('Трамваев нет', keyboard=trams_keyboard())
+        await answer(message, keyboard=trams_keyboard())
 
-        await answer(trams_str, keyboard=trams_keyboard())
+    @rule_disposal(VBMLRule(handlers.show_university_tram_stops, lower=True))
+    async def go_home(self, answer: Message):
+        trams: Iterator[Tram] = Transport.get_trams(answer.id, StopType.UNIVERSITY)
 
-    @rule_disposal(VBMLRule("От УрГЭУ до Умельцев", lower=True))
-    async def from_usue_to_dorm(self, answer: Message):
-        trams = Transport.from_university_to_dorm()
-
-        trams_str = '\n'.join([
+        message = '\n'.join([
             f'{tram.number}: {tram.arrival_time} [{tram.arrival_distance}]' for tram in trams
-        ])
+        ]) or 'Трамваев нет'
 
-        if not trams_str:
-            await answer('Трамваев нет', keyboard=trams_keyboard())
+        await answer(message, keyboard=trams_keyboard())
 
-        await answer(trams_str, keyboard=trams_keyboard())
-
-    @rule_disposal(VBMLRule("Указать адрес", lower=True))
+    @rule_disposal(VBMLRule(handlers.set_tram_stops, lower=True))
     async def select_stop(self, answer: Message):
         await answer(messages.getting_home_stop_first_letter)
         return Branch(branches.adding_tram_stop)

@@ -1,23 +1,22 @@
 import calendar
 import datetime
 import itertools
+import locale
 from enum import Enum
 from typing import Union, Tuple, List, Set
 
 import pendulum
-import locale
-
-import pytz
 from vkbottle import keyboard_gen
 
-from src._date import tz, get_week
+from src import handlers
+from src._date import get_week
 
 locale.setlocale(locale.LC_ALL, 'ru_RU')
 
 
 def general_keyboard():
     return create_keyboard([{"text": "Расписание"}, {"text": "Портал"}],
-                           [{"text": "Где трамваи?", 'color': 'secondary'},
+                           [{"text": handlers.show_trams, 'color': 'secondary'},
                             {"text": "Сменить группу", "color": "secondary"}])
 
 
@@ -26,10 +25,10 @@ def range_menu(arr):
 
 
 def trams_keyboard():
-    return create_keyboard([{"text": 'От Умельцев до УрГЭУ', 'color': 'positive'},
-                            {"text": 'От УрГЭУ до Умельцев', 'color': 'positive'}],
+    return create_keyboard([{"text": handlers.show_home_tram_stops, 'color': 'positive'},
+                            {"text": handlers.show_university_tram_stops, 'color': 'positive'}],
 
-                           [{"text": 'Указать адрес', "color": "negative"},
+                           [{"text": handlers.set_tram_stops, "color": "negative"},
                             {'text': 'Выйти', 'color': 'secondary'}])
 
 
