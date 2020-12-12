@@ -22,7 +22,12 @@ class Transport:
         return stop in stops
 
     @staticmethod
-    def get_trams(stop_id: int) -> Iterator[Tram]:
+    def get_trams(user_id: int, stop_type: StopType) -> Iterator[Tram]:
+        if stop_type == StopType.HOME:
+            stop_id: int = DBTransport.get_home_stop_id(user_id)
+        else:
+            stop_id: int = DBTransport.get_university_stop_id(user_id)
+
         trams = parser.get_trams(stop_id)
 
         # нужны только трамваи с номерами 14, 25 и 27
@@ -30,8 +35,8 @@ class Transport:
 
     @staticmethod
     def get_stops(stop_first_letter: str) -> Tuple[Stop]:
-        def stop_name_and_direction(raw_stop):
-            stop_match = re.match(rf'^(\d+) \(([^)]+)\)$', tram_stop_with_direction,
+        def stop_name_and_direction(raw_stop: str):
+            stop_match = re.match(rf'^(\d+) \(([^)]+)\)$', raw_stop,
                                   flags=re.IGNORECASE)
             if stop_match:
                 stop_name = stop_match.group(1)
@@ -48,16 +53,6 @@ class Transport:
                           zip(stop_ids, stop_names, stop_directions)))
 
         return stops
-
-    @staticmethod
-    def from_dorm_to_university():
-        trams = parser.get_trams(4350)
-        return trams
-
-    @staticmethod
-    def from_university_to_dorm():
-        trams = parser.get_trams(3473)
-        return list(filter(lambda tram: tram.number in ['14', '25', '27'], trams))
 
     @staticmethod
     def get_directions(tram_stop: str) -> List[str]:
