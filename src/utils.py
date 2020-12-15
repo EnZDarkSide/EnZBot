@@ -1,20 +1,22 @@
 import calendar
 import datetime
 import itertools
-import pendulum
 import locale
+from enum import Enum
+from typing import Union, Tuple, List, Set
 
-import pytz
+import pendulum
 from vkbottle import keyboard_gen
 
-from src._date import tz, get_week
+from src.other import handlers
+from src._date import get_week
 
-locale.setlocale(locale.LC_ALL, 'ru_RU.utf8')
+locale.setlocale(locale.LC_ALL, 'ru_RU')
 
 
 def general_keyboard():
     return create_keyboard([{"text": "Расписание"}, {"text": "Портал"}],
-                           [{"text": "Где трамваи?", 'color': 'secondary'},
+                           [{"text": handlers.show_trams, 'color': 'secondary'},
                             {"text": "Сменить группу", "color": "secondary"}])
 
 
@@ -23,11 +25,11 @@ def range_menu(arr):
 
 
 def trams_keyboard():
-    return create_keyboard([{"text": 'От Умельцев до УрГЭУ', 'color': 'positive'},
-                            {"text": 'От УрГЭУ до Умельцев', 'color': 'positive'}],
+    return create_keyboard([{"text": handlers.show_home_tram_stops, 'color': 'positive'},
+                            {"text": handlers.show_university_tram_stops, 'color': 'positive'}],
 
-                           [{"text": 'Указать адрес', "color": "negative"},
-                            {'text': 'Выйти', 'color': 'secondary'}])
+                           [{"text": handlers.set_tram_stops, "color": "negative"},
+                            {'text': handlers.exit_branch, 'color': 'secondary'}])
 
 
 def button(day_name, start_date, end_date=None, btn_name=None, color='primary'):
@@ -117,3 +119,17 @@ def create_keyboard(*rows, one_time=False):
 
 
 kb_exit = create_keyboard([{'text': 'Выйти'}])
+
+
+def iterable_to_string(iterable: Union[Tuple, List, Set]) -> str:
+    string: str = ''
+
+    for item in iterable:
+        string += item + '\n'
+
+    return string
+
+
+class StopType(Enum):
+    HOME = 'home'
+    UNIVERSITY = 'university'

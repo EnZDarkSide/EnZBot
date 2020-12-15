@@ -5,9 +5,9 @@ from vkbottle.bot import Message, Blueprint
 from vkbottle.branch import ClsBranch, Branch, rule_disposal, ExitBranch
 from vkbottle.rule import VBMLRule
 
-from src import messages
+from src.other import messages
 from src.schedule import ScheduleManager
-from src.utils import general_keyboard, range_menu, create_keyboard
+from src.other.utils import general_keyboard, range_menu, create_keyboard
 
 schedule = ScheduleManager().schedules["УрГЭУ"]
 
