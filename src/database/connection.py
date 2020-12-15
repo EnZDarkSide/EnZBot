@@ -1,7 +1,7 @@
-import json
 import os
-from vbml import Pattern
+
 import pymysql
+from vbml import Pattern
 
 pattern = Pattern('mysql://<login>:<pass>@<host>/<database>?reconnect=true')
 

@@ -8,8 +8,8 @@ from typing import Union, Tuple, List, Set
 import pendulum
 from vkbottle import keyboard_gen
 
-from src.other import handlers
 from src._date import get_week
+from src.other import handlers
 
 locale.setlocale(locale.LC_ALL, 'ru_RU')
 

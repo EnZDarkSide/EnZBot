@@ -1,19 +1,17 @@
-import pandas as pd
-
 from datetime import datetime
 
+import pandas as pd
 from vkbottle.bot import Message, Blueprint
 from vkbottle.branch import ClsBranch, ExitBranch, Branch
 from vkbottle.branch import rule_disposal
 from vkbottle.rule import VBMLRule
 
-from src.other import utils, messages
+from src._date import tz
 from src.database.enitities.Portal import DBPortal
+from src.other import utils, messages
+from src.other.utils import general_keyboard, create_keyboard, portal_keyboard, schedule_keyboard
 from src.portal.parser import try_login, format_tasks, PortalManager
 from src.portal.utils import portal_users
-from src.other.utils import general_keyboard, create_keyboard, portal_keyboard, schedule_keyboard
-
-from src._date import tz
 
 kb_exit = create_keyboard([{'text': 'Выйти'}])
 
@@ -122,7 +120,7 @@ async def p_tasks_by_day(answer: Message):
 
     try:
         subj_w_tasks = [x for x in [{'subject': subject.name, 'tasks': subject.get_by_date_arr(dates)}
-                        for subject in subjects] if x['tasks']]
+                                    for subject in subjects] if x['tasks']]
     except IndexError:
         await answer('Раздел заданий для этого предмета не открыт', keyboard=schedule_keyboard())
 
@@ -131,7 +129,7 @@ async def p_tasks_by_day(answer: Message):
         return
 
     for i, subj in enumerate(subj_w_tasks):
-        await answer(f'{"_"*15}\nПредмет: {subj["subject"]}')
+        await answer(f'{"_" * 15}\nПредмет: {subj["subject"]}')
 
         for task in subj['tasks']:
             await answer(task.to_str())

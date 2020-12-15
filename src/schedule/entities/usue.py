@@ -1,7 +1,8 @@
 import json
-from datetime import datetime
-import requests
 import random
+from datetime import datetime
+
+import requests
 
 
 class ScheduleUSUE:
@@ -29,11 +30,10 @@ class ScheduleUSUE:
         days_arr = []
 
         for i, day in enumerate(days):
-            text = f'{"_"*26 if i != 0 else ""} \n' \
+            text = f'{"_" * 26 if i != 0 else ""} \n' \
                    f'📅 День недели: {day["weekDay"]}\n' \
                    f'📅 Дата: {day["date"]}\n\n' \
-
-
+ \
             day['pairs'] = list(filter(lambda x: len(x['schedulePairs']) > 0, day['pairs']))
 
             if len(day['pairs']) == 0:
@@ -51,10 +51,9 @@ class ScheduleUSUE:
                                 f'Группа: {pair["group"]}\n' \
                                 f'Преподаватель: {pair["teacher"]}\n' \
                                 f'Место: {pair["aud"]}\n' \
-
+ \
                         text += f"⌚ : {pair_time['time']} {'(ИДЕТ СЕЙЧАС)' if pair_time['isCurrentPair'] else ''}\n\n" \
-
-
+ \
             days_arr.append(text)
 
         return days_arr

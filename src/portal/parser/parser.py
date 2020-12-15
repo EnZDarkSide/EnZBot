@@ -1,7 +1,8 @@
 import re
+
 import aiohttp
-from lxml import html
 from bs4 import BeautifulSoup
+from lxml import html
 
 from src.portal.models import Subject, SubjTask
 from src.schedule.filters import filters
