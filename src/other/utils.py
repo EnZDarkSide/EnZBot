@@ -11,7 +11,7 @@ from vkbottle import keyboard_gen
 from src._date import get_week
 from src.other import handlers
 
-locale.setlocale(locale.LC_ALL, 'ru_RU')
+locale.setlocale(locale.LC_ALL, 'ru_RU.utf8')
 
 
 def general_keyboard():
