@@ -1,5 +1,4 @@
 import datetime
-import pendulum
 
 from pytz import timezone
 

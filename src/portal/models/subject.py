@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List
 
 
 class SubjTask(object):
@@ -34,4 +33,3 @@ class Subject:
                 result.append(task)
 
         return result
-

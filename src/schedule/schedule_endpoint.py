@@ -2,10 +2,10 @@ from vkbottle.bot import Message, Blueprint
 from vkbottle.branch import Branch, ClsBranch, rule_disposal, ExitBranch
 from vkbottle.framework.framework.rule import VBMLRule
 
-from src.other import utils
 from src.database.enitities.Groups import DBGroups
-from src.schedule import ScheduleManager
+from src.other import utils
 from src.other.utils import general_keyboard
+from src.schedule import ScheduleManager
 
 schedule = ScheduleManager().schedules['УрГЭУ']
 

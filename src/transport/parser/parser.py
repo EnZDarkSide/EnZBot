@@ -1,19 +1,21 @@
-import re
-from typing import Set, Tuple
+from typing import Tuple
 from xml.etree.ElementTree import Element
 
 import requests
 from lxml import html
+from vbml import Patcher, Pattern
 
+from src.transport.entities.stop import Stop
 from src.transport.entities.tram import Tram
+
+base_url = 'https://online.ettu.ru'
 
 
 class TramParser:
-    def __init__(self):
-        self.base_url = 'https://online.ettu.ru'
 
-    def get_stop_elements(self, first_letter: str) -> Tuple[Element]:
-        page = requests.get(f'{self.base_url}/stations/{first_letter.upper()}')
+    @staticmethod
+    def get_stop_elements(first_letter: str) -> Tuple[Element]:
+        page = requests.get(f'{base_url}/stations/{first_letter.upper()}')
         tree = html.fromstring(page.text)
 
         # если есть заголовок 'Троллейбусы', то все ссылки,
@@ -24,8 +26,9 @@ class TramParser:
 
         return tram_stop_els
 
-    def get_trams(self, stop_id: int) -> Tuple[Tram]:
-        page = requests.get(f'{self.base_url}/station/{stop_id}')
+    @staticmethod
+    def get_trams(stop_id: int) -> Tuple[Tram]:
+        page = requests.get(f'{base_url}/station/{stop_id}')
         tree = html.fromstring(page.text)
 
         tram_elements = tree.xpath('body/div/div')[:-1]
@@ -37,25 +40,25 @@ class TramParser:
         return trams
 
     # возвращает названия остановок с их направлением
-    def get_raw_stops(self, first_letter: str) -> Tuple[str]:
-        tram_stop_els = self.get_stop_elements(first_letter)
+    @staticmethod
+    def get_raw_stops(first_letter: str) -> Tuple[str]:
+        tram_stop_els = TramParser.get_stop_elements(first_letter)
         tram_stops_with_directions = tuple(map(lambda el: str(el.text or ''), tram_stop_els))
 
         return tram_stops_with_directions
 
     # возвращает названия остановок
-    def get_stops(self, first_letter: str) -> Set[str]:
-        tram_stop_els = self.get_raw_stops(first_letter)
+    @staticmethod
+    def get_stops(first_letter: str) -> [Stop]:
+        tram_stop_els = TramParser.get_stop_elements(first_letter)
+        result = []
 
-        # ^((?:\w+ ?)+) \(.*$
-        tram_stop_names = set(map(lambda el: re.sub(r'^([^(]+) \(.*$', r'\1', el.text), tram_stop_els))
+        patcher = Patcher()
+        pattern = Pattern("<stop_name> (<stop_direction>)")
 
-        return tram_stop_names
+        for element in tram_stop_els:
+            stop_id = element.get('href').split('/')[-1]
+            check = patcher.check(element.text, pattern)
+            result.append(Stop(id=stop_id, name=check['stop_name'], direction=check['stop_direction']))
 
-    def get_stops_title_and_id(self, first_letter: str) -> Tuple[Tuple[str, int]]:
-        tram_stop_els = self.get_stop_elements(first_letter)
-
-        tram_stops_titles = tuple(map(lambda el: str(el.text or ''), tram_stop_els))
-        tram_stops_ids = tuple(map(lambda el: int(el.get('href') or ''), tram_stop_els))
-
-        return tuple(zip(tram_stops_titles, tram_stops_ids))
+        return result
