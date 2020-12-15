@@ -3,6 +3,6 @@ from dataclasses import dataclass
 
 @dataclass
 class Stop:
-    id: int
+    id: str
     name: str
     direction: str

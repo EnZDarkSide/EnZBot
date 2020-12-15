@@ -1,4 +1,4 @@
-from typing import Tuple, Iterator
+from typing import Iterator
 
 from vkbottle.bot import Message, Blueprint
 from vkbottle.branch import ClsBranch, ExitBranch, Branch
@@ -6,9 +6,8 @@ from vkbottle.branch import rule_disposal
 from vkbottle.rule import VBMLRule
 
 from src.other import handlers, messages, branches
-from src.other.utils import trams_keyboard, general_keyboard, iterable_to_string, StopType
+from src.other.utils import trams_keyboard, general_keyboard, StopType
 from src.transport import Transport
-from src.transport.entities.stop import Stop
 from src.transport.entities.tram import Tram
 
 bp = Blueprint()
@@ -46,7 +45,7 @@ class TramsMenuBranch(ClsBranch):
     @rule_disposal(VBMLRule(handlers.set_tram_stops, lower=True))
     async def select_stop(self, answer: Message):
         await answer(messages.getting_home_stop_first_letter)
-        return Branch(branches.adding_tram_stop)
+        return Branch(branches.first_stop_letter)
 
     @rule_disposal(VBMLRule(handlers.exit_branch, lower=True))
     async def exit_branch(self, answer: Message):
@@ -54,42 +53,14 @@ class TramsMenuBranch(ClsBranch):
         return ExitBranch()
 
 
-@bp.branch.cls_branch(branches.adding_tram_stop)
+@bp.branch.cls_branch(branches.first_stop_letter)
 class AddingTramStopBranch(ClsBranch):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    async def branch(self, answer: Message, *args):
+        stop_names = [f'{stop.id}. {stop.name} ({stop.direction})'
+                      for i, stop in enumerate(Transport.get_stops(answer.text[0]))]
 
-        self.stop_type: StopType = StopType.HOME
-        self.stops: Tuple[Stop] = tuple()
-
-    # выполняется, когда ответ — первая цифра или буква остановки
-    @rule_disposal(VBMLRule(handlers.regex_stop_first_letter, lower=True))
-    async def show_tram_stops(self, answer: Message):
-        self.stops: Tuple[Stop] = Transport.get_stops(answer.text)
-        stop_names: Tuple[str] = tuple(map(lambda stop: str(stop.name), self.stops))
-
-        await answer(iterable_to_string(stop_names))
+        await answer('\n'.join(stop_names))
         await answer(messages.stop_choice)
-
-    # выполняется, когда пользователь написал название остановки
-    @rule_disposal(VBMLRule(handlers.regex_stop_name))
-    async def add_stop_id_to_db(self, answer: Message):
-        stop_name: str = answer.text.lower()
-
-        stops: Tuple[Stop] = tuple(filter(lambda stop: stop.name.lower() == stop_name, self.stops))
-
-        if stops:
-            Transport.save_tram_stop_id(answer.id, stops[0].id, self.stop_type)
-
-            await answer(messages.done)
-            await answer(messages.getting_university_stop_first_letter)
-
-            if self.stop_type == StopType.HOME:
-                self.stop_type = StopType.UNIVERSITY
-            else:
-                return ExitBranch()
-        else:
-            await answer(messages.error)
 
     @rule_disposal(VBMLRule(handlers.exit_branch, lower=True))
     async def exit_branch(self, answer: Message):

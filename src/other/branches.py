@@ -1,2 +1,2 @@
-adding_tram_stop = 'adding-tram-stop'
+first_stop_letter = 'first_stop_letter'
 trams_menu = 'trams_menu'
