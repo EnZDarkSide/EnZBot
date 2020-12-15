@@ -2,26 +2,26 @@
 PyMySQL==0.10.1
 
 # parsing
-lxml==4.5.2
-requests==2.24.0
+lxml==4.6.2
+requests==2.25.0
 
 # vk bot api
 https://github.com/timoniq/vkbottle/archive/v2.0.zip
 
 # зависимости vkbottle
 loguru==0.5.3
-ujson==3.2.0
+ujson==4.0.1
 
 
 # поиск
 python-Levenshtein==0.12.0
 fuzzywuzzy==0.18.0
-numpy~=1.19.2
-pytz~=2020.1
+numpy~=1.19.4
+pytz~=2020.4
 beautifulsoup4~=4.9.3
 expiringdict~=1.2.1
-vbml~=0.5.93
-aiohttp~=3.6.2
-pandas~=1.1.4
+vbml~=1.1
+aiohttp~=3.7.3
+pandas~=1.1.5
 pendulum~=2.1.2
 schedule~=0.6.0
