@@ -9,7 +9,7 @@ from vkbottle import keyboard_gen
 
 from src._date import tz, get_week
 
-locale.setlocale(locale.LC_ALL, 'ru_RU')
+locale.setlocale(locale.LC_ALL, 'ru_RU.utf8')
 
 
 def general_keyboard():
