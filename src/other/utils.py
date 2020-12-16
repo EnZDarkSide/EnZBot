@@ -23,12 +23,16 @@ def range_menu(arr):
     return create_keyboard(*[[{"text": str(i)}] for i in arr])
 
 
-def trams_keyboard():
-    return create_keyboard([{"text": handlers.show_home_tram_stops, 'color': 'positive'},
-                            {"text": handlers.show_university_tram_stops, 'color': 'positive'}],
+def trams_keyboard(one_time: bool = False) -> str:
+    return create_keyboard(
+        [{"text": handlers.show_home_tram_stops, 'color': 'positive'},
+         {"text": handlers.show_university_tram_stops, 'color': 'positive'}],
 
-                           [{"text": handlers.set_tram_stops, "color": "negative"},
-                            {'text': handlers.exit_branch, 'color': 'secondary'}])
+        [{"text": handlers.set_tram_stops, "color": "negative"},
+         {'text': handlers.exit_branch, 'color': 'secondary'}],
+
+        one_time=one_time
+    )
 
 
 def button(day_name, start_date, end_date=None, btn_name=None, color='primary'):

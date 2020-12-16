@@ -15,7 +15,7 @@ bp = Blueprint()
 
 @bp.on.message(text=[handlers.show_trams, handlers.show_trams_short])
 async def portal(answer: Message):
-    await answer(messages.endpoint_choice, keyboard=trams_keyboard())
+    await answer(messages.endpoint_choice, keyboard=trams_keyboard(one_time=True))
     return Branch(branches.trams_menu)
 
 
