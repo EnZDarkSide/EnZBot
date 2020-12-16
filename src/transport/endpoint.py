@@ -25,7 +25,7 @@ class TramsMenuBranch(ClsBranch):
 
     @rule_disposal(VBMLRule(handlers.show_home_tram_stops, lower=True))
     async def go_to_university(self, answer: Message):
-        trams: Iterator[Tram] = Transport.get_trams(answer.id, StopType.HOME)
+        trams: Iterator[Tram] = Transport.get_trams(answer.peer_id, StopType.HOME)
 
         message = '\n'.join([
             f'{tram.number}: {tram.arrival_time} [{tram.arrival_distance}]' for tram in trams
@@ -35,7 +35,7 @@ class TramsMenuBranch(ClsBranch):
 
     @rule_disposal(VBMLRule(handlers.show_university_tram_stops, lower=True))
     async def go_home(self, answer: Message):
-        trams: Iterator[Tram] = Transport.get_trams(answer.id, StopType.UNIVERSITY)
+        trams: Iterator[Tram] = Transport.get_trams(answer.peer_id, StopType.UNIVERSITY)
 
         message = '\n'.join([
             f'{tram.number}: {tram.arrival_time} [{tram.arrival_distance}]' for tram in trams
@@ -83,7 +83,7 @@ class SetHomeTramStopsBranch(ClsBranch):
             await answer(messages.wrong_stop_id)
             return
 
-        Transport.save_tram_stop_id(answer.id, stop_id, StopType.HOME)
+        Transport.save_tram_stop_id(answer.peer_id, stop_id, StopType.HOME)
 
         await answer(messages.done)
         await answer(messages.getting_university_stop_first_letter)
@@ -125,7 +125,7 @@ class SetUniversityTramStopsBranch(ClsBranch):
             await answer(messages.wrong_stop_id)
             return
 
-        Transport.save_tram_stop_id(answer.id, stop_id, StopType.UNIVERSITY)
+        Transport.save_tram_stop_id(answer.peer_id, stop_id, StopType.UNIVERSITY)
 
         await answer(messages.done)
 
