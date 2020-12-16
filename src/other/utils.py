@@ -2,14 +2,11 @@ import calendar
 import datetime
 import itertools
 import locale
-from enum import Enum
-from typing import Union, Tuple, List, Set
 
 import pendulum
 from vkbottle import keyboard_gen
 
 from src._date import get_week
-from src.other import handlers
 
 locale.setlocale(locale.LC_ALL, 'ru_RU.utf8')
 

@@ -4,6 +4,7 @@ from vkbottle.branch import ClsBranch, Branch, rule_disposal, ExitBranch
 from vkbottle.rule import VBMLRule
 
 import src.database.enitities
+import src.database.enitities
 from src.other import messages
 from src.other.utils import general_keyboard, range_menu, create_keyboard
 from src.schedule import ScheduleManager
