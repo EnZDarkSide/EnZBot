@@ -1,6 +1,6 @@
 from typing import Iterator, Union
 
-from src.other.utils import StopType
+from src.transport.entities.stop_type import StopType
 from .entities.stop import Stop
 from .entities.tram import Tram
 from .parser import TramParser

@@ -2,7 +2,6 @@ import calendar
 import datetime
 import itertools
 import locale
-from enum import Enum
 
 import pendulum
 from vkbottle import keyboard_gen
@@ -122,8 +121,3 @@ def create_keyboard(*rows, one_time=False):
 
 
 kb_exit = create_keyboard([{'text': 'Выйти'}])
-
-
-class StopType(Enum):
-    HOME = 'home'
-    UNIVERSITY = 'university'

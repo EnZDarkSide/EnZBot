@@ -1,3 +1,3 @@
-first_stop_letter = 'first_stop_letter'
-applying_home_stop = 'applying_stop'
 trams_menu = 'trams_menu'
+set_home_tram_stops = 'set_home_tram_stops'
+set_university_tram_stops = 'set_university_tram_stops'
