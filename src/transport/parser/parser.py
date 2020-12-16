@@ -14,6 +14,12 @@ base_url = 'https://online.ettu.ru'
 class TramParser:
 
     @staticmethod
+    def is_id_valid(stop_id: int) -> bool:
+        """Проверяет, если остановка с таким id существует"""
+
+        return requests.get(f'{base_url}/station/{stop_id}').ok
+
+    @staticmethod
     def get_stop_elements(first_letter: str) -> Tuple[Element]:
         page = requests.get(f'{base_url}/stations/{first_letter.upper()}')
         tree = html.fromstring(page.text)
@@ -50,6 +56,8 @@ class TramParser:
     # возвращает названия остановок
     @staticmethod
     def get_stops(first_letter: str) -> [Stop]:
+        """Возвращает объекты Stop по первой букве остановки"""
+
         tram_stop_els = TramParser.get_stop_elements(first_letter)
         result = []
 

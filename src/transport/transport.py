@@ -1,4 +1,4 @@
-from typing import Iterator
+from typing import Iterator, Union
 
 from src.other.utils import StopType
 from .entities.stop import Stop
@@ -10,15 +10,26 @@ parser = TramParser()
 
 
 class Transport:
-    # noinspection PyShadowingNames
+
     @staticmethod
-    def stop_exists(stop: str) -> bool:
-        stop = stop.lower()
-        stop_first_letter = stop[0]
+    def __check_stop_by_name(stop_name: str) -> bool:
+        stop_name = stop_name.lower()
+        stop_first_letter = stop_name[0]
 
-        stops = map(lambda stop: stop.lower(), parser.get_stops(stop_first_letter))
+        stops_names = map(lambda stop: stop.lower(), Transport.get_stops_names(stop_first_letter))
 
-        return stop in stops
+        return stop_name in stops_names
+
+    @staticmethod
+    def __check_stop_by_id(stop_id: int) -> bool:
+        return TramParser.is_id_valid(stop_id)
+
+    @staticmethod
+    def stop_exists(stop: Union[str, int]) -> bool:
+        if isinstance(stop, str):
+            return Transport.__check_stop_by_name(stop)
+        elif isinstance(stop, int):
+            return Transport.__check_stop_by_id(stop)
 
     @staticmethod
     def get_trams(user_id: int, stop_type: StopType) -> Iterator[Tram]:
@@ -34,8 +45,15 @@ class Transport:
 
     @staticmethod
     def get_stops(stop_first_letter: str) -> [Stop]:
-        """ Возвращает остановки по первой букве """
+        """Возвращает остановки по первой букве"""
+
         return parser.get_stops(stop_first_letter)
+
+    @staticmethod
+    def get_stops_names(stop_first_letter: str) -> [str]:
+        """Возвращает названия остановок по первой их букве"""
+
+        return list(map(lambda stop: stop.name, Transport.get_stops(stop_first_letter)))
 
     @staticmethod
     def save_tram_stop_id(user_id: int, tram_stop_id: int, stop_type: StopType):

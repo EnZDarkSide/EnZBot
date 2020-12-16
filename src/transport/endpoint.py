@@ -56,11 +56,38 @@ class TramsMenuBranch(ClsBranch):
 @bp.branch.cls_branch(branches.first_stop_letter)
 class AddingTramStopBranch(ClsBranch):
     async def branch(self, answer: Message, *args):
+        first_stop_letter = answer.text[0]
+
         stop_names = [f'{stop.id}. {stop.name} ({stop.direction})'
-                      for i, stop in enumerate(Transport.get_stops(answer.text[0]))]
+                      for stop in Transport.get_stops(first_stop_letter)]
 
         await answer('\n'.join(stop_names))
         await answer(messages.stop_choice)
+
+        return Branch(branches.applying_home_stop)
+
+    @rule_disposal(VBMLRule(handlers.exit_branch, lower=True))
+    async def exit_branch(self, answer: Message):
+        await answer(messages.resp_show_menu, keyboard=general_keyboard())
+        return ExitBranch()
+
+
+@bp.branch.cls_branch(branches.applying_home_stop)
+class ApplyingHomeStopBranch(ClsBranch):
+    async def branch(self, answer: Message, *args):
+        try:
+            stop_id = int(answer.text)
+        except ValueError:
+            await answer(messages.wrong_stop_id)
+            return
+
+        if not Transport.stop_exists(stop_id):
+            await answer(messages.wrong_stop_id)
+            return
+
+        Transport.save_tram_stop_id(answer.id, stop_id, StopType.HOME)
+
+        await answer(messages.done)
 
     @rule_disposal(VBMLRule(handlers.exit_branch, lower=True))
     async def exit_branch(self, answer: Message):
