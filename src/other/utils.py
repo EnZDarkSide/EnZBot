@@ -2,11 +2,13 @@ import calendar
 import datetime
 import itertools
 import locale
+from enum import Enum
 
 import pendulum
 from vkbottle import keyboard_gen
 
 from src._date import get_week
+from src.other import handlers
 
 locale.setlocale(locale.LC_ALL, 'ru_RU.utf8')
 
@@ -116,15 +118,6 @@ def create_keyboard(*rows, one_time=False):
 
 
 kb_exit = create_keyboard([{'text': 'Выйти'}])
-
-
-def iterable_to_string(iterable: Union[Tuple, List, Set]) -> str:
-    string: str = ''
-
-    for item in iterable:
-        string += item + '\n'
-
-    return string
 
 
 class StopType(Enum):
