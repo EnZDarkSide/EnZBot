@@ -24,18 +24,14 @@ async def portal(answer: Message):
 class TramsMenuBranch(ClsBranch):
 
     @rule_disposal(VBMLRule(handlers.show_home_tram_stops, lower=True))
-    async def go_to_university(self, answer: Message):
-        trams: Iterator[Tram] = Transport.get_trams(answer.peer_id, StopType.HOME)
-
-        message = '\n'.join([
-            f'{tram.number}: {tram.arrival_time} [{tram.arrival_distance}]' for tram in trams
-        ]) or messages.no_trams
-
-        await answer(message, keyboard=trams_keyboard())
-
     @rule_disposal(VBMLRule(handlers.show_university_tram_stops, lower=True))
-    async def go_home(self, answer: Message):
-        trams: Iterator[Tram] = Transport.get_trams(answer.peer_id, StopType.UNIVERSITY)
+    async def show_trams(self, answer: Message):
+        if answer.text == handlers.show_home_tram_stops:
+            stop_type = StopType.HOME
+        else:
+            stop_type = StopType.UNIVERSITY
+
+        trams: Iterator[Tram] = Transport.get_trams(answer.peer_id, stop_type)
 
         message = '\n'.join([
             f'{tram.number}: {tram.arrival_time} [{tram.arrival_distance}]' for tram in trams
