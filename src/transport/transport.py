@@ -24,6 +24,18 @@ class Transport:
             raise TypeError('stop должна быть либо строкой, либо целым числом')
 
     @staticmethod
+    def stop_saved(user_id: int, stop_type: StopType = None) -> bool:
+        """Проверяет, если остановка дома или университета сохранена в БД"""
+
+        if stop_type == StopType.HOME:
+            return bool(DBTransport.get_home_stop_id(user_id))
+        elif stop_type == StopType.UNIVERSITY:
+            return bool(DBTransport.get_university_stop_id(user_id))
+        else:
+            return bool(DBTransport.get_home_stop_id(user_id)) \
+                   or bool(DBTransport.get_university_stop_id(user_id))
+
+    @staticmethod
     def get_trams(user_id: int, stop_type: StopType) -> Iterator[Tram]:
         """Возвращает список трамваем остановки, идентификатор которой находится в базе пользователя
 

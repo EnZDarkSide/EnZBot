@@ -16,7 +16,21 @@ bp = Blueprint()
 
 @bp.on.message(text=[handlers.show_trams, handlers.show_trams_short])
 async def portal(answer: Message):
-    await answer(messages.endpoint_choice, keyboard=trams_keyboard(one_time=True))
+    show_home_btn: bool = Transport.stop_saved(answer.peer_id, StopType.HOME)
+    show_university_btn: bool = Transport.stop_saved(answer.peer_id, StopType.UNIVERSITY)
+
+    keyboard = trams_keyboard(
+        home_btn_enabled=show_home_btn,
+        university_btn_enabled=show_university_btn,
+        one_time=True
+    )
+
+    if Transport.stop_saved(answer.peer_id):
+        message: str = messages.endpoint_choice
+    else:
+        message: str = messages.no_stop_saved
+
+    await answer(message, keyboard=keyboard)
     return Branch(branches.trams_menu)
 
 
