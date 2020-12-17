@@ -41,7 +41,7 @@ class Transport:
         trams = parser.get_trams(stop_id)
 
         # нужны только трамваи с номерами 14, 25 и 27
-        return filter(lambda tram: tram.number in (14, 25, 27), trams)
+        return filter(lambda tram: tram.number in ('14', '25', '27'), trams)
 
     @staticmethod
     def get_stops(stop_first_letter: str) -> [Stop]:

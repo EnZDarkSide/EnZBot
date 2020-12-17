@@ -23,8 +23,8 @@ async def portal(answer: Message):
 @bp.branch.cls_branch(branches.trams_menu)
 class TramsMenuBranch(ClsBranch):
 
-    @rule_disposal(VBMLRule(handlers.show_home_tram_stops, lower=True))
-    @rule_disposal(VBMLRule(handlers.show_university_tram_stops, lower=True))
+    @rule_disposal(VBMLRule(
+        [handlers.show_home_tram_stops, handlers.show_university_tram_stops], lower=True))
     async def show_trams(self, answer: Message):
         if answer.text == handlers.show_home_tram_stops:
             stop_type = StopType.HOME
