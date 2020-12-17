@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, List
 from xml.etree.ElementTree import Element
 
 import requests
@@ -20,19 +20,6 @@ class TramParser:
         return requests.get(f'{base_url}/station/{stop_id}').ok
 
     @staticmethod
-    def get_stop_elements(first_letter: str) -> Tuple[Element]:
-        page = requests.get(f'{base_url}/stations/{first_letter.upper()}')
-        tree = html.fromstring(page.text)
-
-        # если есть заголовок 'Троллейбусы', то все ссылки,
-        # которые сверху этого заголовка, — трамвайные остановки;
-        # иначе берутся все ссылки, которые ниже заголовка 'Трамваи'
-        tram_stop_els = tree.xpath('//h3[2]/preceding-sibling::a[@href]') \
-                        or tree.xpath("//h3[contains(text(), 'Трамваи')][1]/following-sibling::a")
-
-        return tram_stop_els
-
-    @staticmethod
     def get_trams(stop_id: int) -> Tuple[Tram]:
         page = requests.get(f'{base_url}/station/{stop_id}')
         tree = html.fromstring(page.text)
@@ -45,28 +32,33 @@ class TramParser:
 
         return trams
 
-    # возвращает названия остановок с их направлением
     @staticmethod
-    def get_raw_stops(first_letter: str) -> Tuple[str]:
-        tram_stop_els = TramParser.get_stop_elements(first_letter)
-        tram_stops_with_directions = tuple(map(lambda el: str(el.text or ''), tram_stop_els))
-
-        return tram_stops_with_directions
-
-    # возвращает названия остановок
-    @staticmethod
-    def get_stops(first_letter: str) -> [Stop]:
+    def get_stops(first_letter: str) -> List[Stop]:
         """Возвращает объекты Stop по первой букве остановки"""
 
-        tram_stop_els = TramParser.get_stop_elements(first_letter)
-        result = []
+        tram_stop_els = TramParser._get_stop_elements(first_letter)
+        stops = []
 
         patcher = Patcher()
-        pattern = Pattern("<stop_name> (<stop_direction>)")
+        pattern = Pattern("<name> (<direction>)")
 
         for element in tram_stop_els:
-            stop_id = element.get('href').split('/')[-1]
-            check = patcher.check(element.text, pattern)
-            result.append(Stop(id=stop_id, name=check['stop_name'], direction=check['stop_direction']))
+            stop_id = int(element.get('href').split('/')[-1])
+            stop = patcher.check(element.text, pattern)
 
-        return result
+            stops.append(Stop(stop_id, stop['name'], stop['direction']))
+
+        return stops
+
+    @staticmethod
+    def _get_stop_elements(first_letter: str) -> Tuple[Element]:
+        page = requests.get(f'{base_url}/stations/{first_letter.upper()}')
+        tree = html.fromstring(page.text)
+
+        # если есть заголовок 'Троллейбусы', то все ссылки,
+        # которые сверху этого заголовка, — трамвайные остановки;
+        # иначе берутся все ссылки, которые ниже заголовка 'Трамваи'
+        tram_stop_els = tree.xpath('//h3[2]/preceding-sibling::a[@href]') \
+                        or tree.xpath("//h3[contains(text(), 'Трамваи')][1]/following-sibling::a")
+
+        return tram_stop_els

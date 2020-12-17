@@ -7,7 +7,11 @@ class DBTransport:
     @staticmethod
     def get_home_stop_id(user_id: int) -> Union[int, None]:
         DB.exec_command(f'SELECT HomeStopId FROM transport WHERE UserId={user_id}', False)
-        return cur.fetchone()[0]
+
+        try:
+            return cur.fetchone()[0]
+        except IndexError:
+            return None
 
     @staticmethod
     def save_home_stop_id(user_id: int, home_stop_id: int) -> bool:
@@ -20,7 +24,11 @@ class DBTransport:
     @staticmethod
     def get_university_stop_id(user_id: int) -> Union[int, None]:
         DB.exec_command(f'SELECT UniversityStopId FROM transport WHERE UserId={user_id}', False)
-        return cur.fetchone()[0]
+
+        try:
+            return cur.fetchone()[0]
+        except IndexError:
+            return None
 
     @classmethod
     def save_university_stop_id(cls, user_id: int, university_stop_id: int) -> bool:
