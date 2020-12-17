@@ -10,9 +10,12 @@ parser = TramParser()
 
 
 class Transport:
+    """API для доступа к расписанию трамваев"""
 
     @staticmethod
     def stop_exists(stop: Union[str, int]) -> bool:
+        """Проверяет существавание остановки по названию или идентификатору"""
+
         if isinstance(stop, str):
             return Transport._check_stop_by_name(stop)
         elif isinstance(stop, int):
@@ -22,6 +25,13 @@ class Transport:
 
     @staticmethod
     def get_trams(user_id: int, stop_type: StopType) -> Iterator[Tram]:
+        """Возвращает список трамваем остановки, идентификатор которой находится в базе пользователя
+
+        Аргументы:
+            user_id: int — id из ВК
+            stop_type: StopType — два типа: HOME или UNIVERSITY
+        """
+
         if stop_type == StopType.HOME:
             stop_id: int = DBTransport.get_home_stop_id(user_id)
         else:
@@ -40,6 +50,8 @@ class Transport:
 
     @staticmethod
     def save_tram_stop_id(user_id: int, tram_stop_id: int, stop_type: StopType):
+        """Сохраняет идентификатор остановки дома или университета в БД"""
+
         if stop_type == StopType.HOME:
             DBTransport.save_home_stop_id(user_id, tram_stop_id)
         else:

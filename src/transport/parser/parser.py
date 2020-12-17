@@ -21,6 +21,8 @@ class TramParser:
 
     @staticmethod
     def get_trams(stop_id: int) -> Tuple[Tram]:
+        """Возвращает трамваи для данной остановки"""
+
         page = requests.get(f'{base_url}/station/{stop_id}')
         tree = html.fromstring(page.text)
 
