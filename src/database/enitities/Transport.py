@@ -14,7 +14,7 @@ class DBTransport:
 
         try:
             return cur.fetchone()[0]
-        except IndexError:
+        except TypeError:
             return None
 
     @staticmethod
@@ -35,7 +35,7 @@ class DBTransport:
 
         try:
             return cur.fetchone()[0]
-        except IndexError:
+        except TypeError:
             return None
 
     @classmethod
