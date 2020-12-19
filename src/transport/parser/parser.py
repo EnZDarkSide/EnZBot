@@ -1,9 +1,9 @@
+import re
 from typing import Tuple, List
 from xml.etree.ElementTree import Element
 
 import requests
 from lxml import html
-from vbml import Patcher, Pattern
 
 from src.transport.entities.stop import Stop
 from src.transport.entities.tram import Tram
@@ -41,12 +41,12 @@ class TramParser:
         tram_stop_els = TramParser._get_stop_elements(first_letter)
         stops = []
 
-        patcher = Patcher()
-        pattern = Pattern("<name> (<direction>)")
+        # всё, что до скобок, — название, остальное, если есть, — направление
+        pattern = re.compile(r'^(?P<name>[^(]+)(?: \((?P<direction>[^)]+)\))?$')
 
         for element in tram_stop_els:
             stop_id = int(element.get('href').split('/')[-1])
-            stop = patcher.check(element.text, pattern)
+            stop = pattern.fullmatch(element.text)
 
             stops.append(Stop(stop_id, stop['name'], stop['direction']))
 
