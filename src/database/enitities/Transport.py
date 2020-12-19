@@ -11,11 +11,7 @@ class DBTransport:
         """Возвращает идентификатор остановки дома или None"""
 
         DB.exec_command(f'SELECT HomeStopId FROM transport WHERE UserId={user_id}', False)
-
-        try:
-            return cur.fetchone()[0]
-        except TypeError:
-            return None
+        return fetch[0] if (fetch := cur.fetchone()) else None
 
     @staticmethod
     def save_home_stop_id(user_id: int, home_stop_id: int) -> bool:
@@ -32,11 +28,7 @@ class DBTransport:
         """Возвращает идентификатор остановки университета или None"""
 
         DB.exec_command(f'SELECT UniversityStopId FROM transport WHERE UserId={user_id}', False)
-
-        try:
-            return cur.fetchone()[0]
-        except TypeError:
-            return None
+        return fetch[0] if (fetch := cur.fetchone()) else None
 
     @classmethod
     def save_university_stop_id(cls, user_id: int, university_stop_id: int) -> bool:
