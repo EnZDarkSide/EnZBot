@@ -7,5 +7,5 @@ show_home_tram_stops = 'Домой'
 show_university_tram_stops = 'В университет'
 exit_branch = 'Выйти'
 
-regex_stop_first_letter = Pattern(r"<([147абвгдежзиклмнопрстуфцчшэюАБВГДЕЖЗИКЛМНОПРСТУФЦЧШЭЮ])$>")
-regex_stop_id = Pattern(r"<(\d{4,6})$>")
+regex_stop_first_letter = Pattern(r'<([147а-яА-Я])$>')
+regex_stop_id = Pattern(r'<(\d+)$>')
