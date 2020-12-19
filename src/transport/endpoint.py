@@ -74,7 +74,7 @@ class SetHomeTramStopsBranch(ClsBranch):
     # вызывается, когда пользователь вводит первый символ остановки
     @rule_disposal(VBMLRule(handlers.regex_stop_first_letter, lower=True))
     async def show_stops(self, answer: Message):
-        stop_names = [f'{stop.id}. {stop.name} ({stop.direction})'
+        stop_names = [f'{stop.id}: {stop.title}'
                       for stop in Transport.get_stops(stop_first_letter=answer.text)]
 
         await answer('\n'.join(stop_names))
