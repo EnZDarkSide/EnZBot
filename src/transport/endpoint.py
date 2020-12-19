@@ -17,22 +17,13 @@ bp = Blueprint()
 @bp.on.message(text=[handlers.show_trams, handlers.show_trams_short])
 async def show_tram_menu(answer: Message):
     """Создаёт основное меню для травмаев"""
+    keyboard = trams_keyboard(user_id=answer.from_id, one_time=True)
 
-    show_home_btn: bool = Transport.stop_saved(answer.peer_id, StopType.HOME)
-    show_university_btn: bool = Transport.stop_saved(answer.peer_id, StopType.UNIVERSITY)
+    await answer(
+        messages.endpoint_choice if Transport.stop_saved(answer.from_id) else messages.no_stop_saved,
+        keyboard=keyboard)
 
-    keyboard = trams_keyboard(
-        home_btn_enabled=show_home_btn,
-        university_btn_enabled=show_university_btn,
-        one_time=True
-    )
 
-    if Transport.stop_saved(answer.peer_id):
-        message: str = messages.endpoint_choice
-    else:
-        message: str = messages.no_stop_saved
-
-    await answer(message, keyboard=keyboard)
     return Branch(branches.trams_menu)
 
 
@@ -63,20 +54,9 @@ class TramsMenuBranch(ClsBranch, BaseTramBranchInterface):
 
         trams: Iterator[Tram] = Transport.get_trams(answer.peer_id, stop_type)
 
-        message = '\n'.join([
+        await answer('\n'.join([
             f'{tram.number}: {tram.arrival_time} [{tram.arrival_distance}]' for tram in trams
-        ]) or messages.no_trams
-
-        show_home_btn: bool = Transport.stop_saved(answer.peer_id, StopType.HOME)
-        show_university_btn: bool = Transport.stop_saved(answer.peer_id, StopType.UNIVERSITY)
-
-        keyboard = trams_keyboard(
-            home_btn_enabled=show_home_btn,
-            university_btn_enabled=show_university_btn,
-            one_time=True
-        )
-
-        await answer(message, keyboard=keyboard)
+        ]) or messages.no_trams, keyboard=trams_keyboard(user_id=answer.from_id, one_time=True))
 
     @rule_disposal(VBMLRule(handlers.set_tram_stops, lower=True))
     async def start_stops_setup(self, answer: Message):

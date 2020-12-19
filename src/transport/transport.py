@@ -1,10 +1,11 @@
-from typing import Iterator, Union
+from typing import Iterator, Union, List
 
 from src.transport.entities.stop_type import StopType
 from .entities.stop import Stop
 from .entities.tram import Tram
 from .parser import TramParser
 from ..database.enitities.Transport import DBTransport
+from ..other import handlers
 
 parser = TramParser()
 
@@ -55,10 +56,15 @@ class Transport:
         return filter(lambda tram: tram.number in ('14', '25', '27'), trams)
 
     @staticmethod
-    def get_stops(stop_first_letter: str) -> [Stop]:
+    def get_stops(stop_first_letter: str) -> List[Stop]:
         """Возвращает остановки по первой букве"""
 
         return parser.get_stops(stop_first_letter)
+
+    @staticmethod
+    def get_saved_stops(user_id: int) -> List[Union[str, None]]:
+        return [DBTransport.get_home_stop_id(user_id) and handlers.show_home_tram_stops,
+                DBTransport.get_university_stop_id(user_id) and handlers.show_university_tram_stops]
 
     @staticmethod
     def save_tram_stop_id(user_id: int, tram_stop_id: int, stop_type: StopType):
@@ -83,5 +89,5 @@ class Transport:
         return TramParser.is_id_valid(stop_id)
 
     @staticmethod
-    def _get_stops_names(stop_first_letter: str) -> [str]:
+    def _get_stops_names(stop_first_letter: str) -> List[str]:
         return list(map(lambda stop: stop.name, Transport.get_stops(stop_first_letter)))

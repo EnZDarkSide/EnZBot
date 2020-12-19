@@ -8,6 +8,7 @@ from vkbottle import keyboard_gen
 
 from src._date import get_week
 from src.other import handlers
+from src.transport import Transport
 
 locale.setlocale(locale.LC_ALL, 'ru_RU.utf8')
 
@@ -22,24 +23,16 @@ def range_menu(arr):
     return create_keyboard(*[[{"text": str(i)}] for i in arr])
 
 
-def trams_keyboard(home_btn_enabled: bool = True, university_btn_enabled: bool = True, one_time: bool = False) -> str:
-    direction_btns = []
-
-    if home_btn_enabled:
-        direction_btns.append({"text": handlers.show_home_tram_stops, 'color': 'positive'})
-
-    if university_btn_enabled:
-        direction_btns.append({"text": handlers.show_university_tram_stops, 'color': 'positive'})
+def trams_keyboard(user_id: int, one_time: bool = False) -> str:
+    direction_btns = list(map(lambda stop_name: {"text": stop_name, 'color': 'positive'},
+                              filter(None.__ne__, Transport.get_saved_stops(user_id))))
 
     action_btns = [
         {"text": handlers.set_tram_stops, "color": "negative"},
         {'text': handlers.exit_branch, 'color': 'secondary'}
     ]
 
-    if direction_btns:
-        return create_keyboard(direction_btns, action_btns, one_time=one_time)
-    else:
-        return create_keyboard(action_btns, one_time=one_time)
+    return create_keyboard(*filter(lambda lst: bool(lst), [direction_btns, action_btns]), one_time=one_time)
 
 
 def button(day_name, start_date, end_date=None, btn_name=None, color='primary'):
