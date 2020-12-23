@@ -1,8 +1,9 @@
 import calendar
 import datetime
 import itertools
+import json
 import locale
-from typing import Iterator, List, Dict, Iterable, Any, Callable, Tuple
+from typing import Iterator, List, Dict, Iterable, Any, Tuple, Union
 
 import pendulum
 from vkbottle import keyboard_gen
@@ -15,14 +16,14 @@ from src.transport.entities.stop import Stop
 locale.setlocale(locale.LC_ALL, 'ru_RU.utf8')
 
 
-def _serialize_by_name_length(stop: Iterable[Stop]) -> Tuple[List[Stop], List[Stop], List[Stop]]:
+def _serialize_by_name_length(stops: Iterable[Stop]) -> Tuple[List[Stop], List[Stop], List[Stop]]:
     """Разделяет элементы по треём категоримя, чтобы вывести по кнопкам"""
 
     shorts: List[Stop] = []
     mediums: List[Stop] = []
     longs: List[Stop] = []
 
-    for stop in stop:
+    for stop in stops:
         if (length := len(stop.name)) <= 11:
             shorts.append(stop)
         elif length <= 18:
@@ -52,8 +53,7 @@ def trams_keyboard(user_id: int, one_time: bool = False) -> str:
 
     action_btns = [
         {'text': handlers.set_tram_stops, 'color': 'negative'},
-        {'text': handlers.exit_branch, 'color': 'secondary'},
-        {'text': 'Some text'}
+        {'text': handlers.exit_branch, 'color': 'secondary'}
     ]
 
     rows = filter(lambda btns: bool(btns), [direction_btns, action_btns])
@@ -62,7 +62,6 @@ def trams_keyboard(user_id: int, one_time: bool = False) -> str:
 
 
 def stops_keyboard(stops: List[Stop]) -> str:
-    # def stops_keyboard(stops: Iterable[Stop]) -> str:
     # получаем три листа: короткие остановки, средние и длинные
     lsts: Tuple[List[Stop], List[Stop], List[Stop]] = _serialize_by_name_length(stops)
     rows: List[List[Dict[str, str]]] = []
@@ -88,6 +87,58 @@ def stops_keyboard(stops: List[Stop]) -> str:
             lsts[i + 1].extend(lst[-left:])
 
     return create_keyboard(*rows, [{'text': handlers.exit_branch, 'color': 'secondary'}])
+
+
+def _serialize_by_direction_length(directions: List[Tuple[int, str]]) -> Tuple[
+    List[Tuple[int, str]], List[Tuple[int, str]], List[Tuple[int, str]]]:
+    """Разделяет элементы по треём категоримя, чтобы вывести по кнопкам"""
+
+    shorts: List[Tuple[int, str]] = []
+    mediums: List[Tuple[int, str]] = []
+    longs: List[Tuple[int, str]] = []
+
+    for direction in directions:
+        if not direction[1]:
+            continue
+
+        if (length := len(direction[1])) <= 11:
+            shorts.append(direction)
+        elif length <= 18:
+            mediums.append(direction)
+        else:
+            longs.append(direction)
+
+    return shorts, mediums, longs
+
+
+def directions_keyboard(directions: List[Tuple[int, str]], one_time: bool = False):
+    # получаем три листа: короткие остановки, средние и длинные
+    lsts: Tuple[List[Tuple[int, str]], List[Tuple[int, str]], List[Tuple[int, str]]] = \
+        _serialize_by_direction_length(directions)
+    rows: List[List[Dict[str, str]]] = []
+
+    # проходится по всем трём листам
+    for i in range(len(lsts)):
+        lst = lsts[i]
+        # обе перменные нужны для функции zip: https://stackoverflow.com/a/5389547/9645340
+        # достать нужное количесвто элементов за раз
+        lst_iter = iter(lst)
+        # количество кнопок в ряд
+        btns_count = 3 - i
+
+        # создаёт кнопки: короткие названия — 3 в ряд,
+        # средние — 2 в ряд и длинные — 1 название идёт в ряд
+        for directions in zip(*[lst_iter] * btns_count):
+            rows.append([{'text': direction[1][:40], 'payload': json.dumps(direction[0])} for direction in directions])
+
+        # если остаются кнопки
+        # — например, в листе кортких было 8, берётся два раза по 3, две остаются —
+        # добавить их в лист следующих по длине
+        if left := len(lst) % btns_count:
+            lsts[i + 1].extend(lst[-left:])
+
+    return create_keyboard(*rows, [{'text': handlers.choose_another_stop, 'color': 'secondary'},
+                                   {'text': handlers.exit_branch, 'color': 'secondary'}], one_time=one_time)
 
 
 def button(day_name, start_date, end_date=None, btn_name=None, color='primary'):

@@ -1,4 +1,5 @@
-from typing import Iterator
+import json
+from typing import Iterator, List, Tuple, Union
 
 from vkbottle.bot import Message, Blueprint
 from vkbottle.branch import ClsBranch, ExitBranch, Branch
@@ -72,7 +73,6 @@ class ShowTramStopsBranch(ClsBranch, BaseTramBranchInterface):
         """Вызывается, когда пользователь ввёл недопустимый символ или больше одного символа"""
 
         await answer(messages.no_stops_for_this_char if len(answer.text) == 1 else messages.one_char_only)
-        await answer(answer.payload)
 
     @rule_disposal(VBMLRule(handlers.regex_stop_first_letter, lower=True))
     async def show_stops(self, answer: Message):
@@ -87,6 +87,41 @@ class ShowTramStopsBranch(ClsBranch, BaseTramBranchInterface):
         return Branch(branches.show_tram_directions, stop_type=self.context['stop_type'])
 
 
+@bp.branch.cls_branch(branches.show_tram_directions)
+class ShowTramDirectionsBranch(ClsBranch, BaseTramBranchInterface):
+    """"""
+
+    async def branch(self, answer: Message, *args):
+        """Показывает направления по выбранной пользователем остановке"""
+
+        if not answer.payload:
+            await answer("Выберите остановку из списка кнопок")
+
+        # направления остановок с их идентификаторами
+        directions: List[Tuple[int, Union[str, None]]] = json.loads(answer.payload)
+
+        if len(directions) == 1:
+            direction: Union[str, None] = directions[0][1]
+            stop_title: str = answer.text + (f'({direction})' if direction else '')
+            await answer(f'Вы выбрали {stop_title}')
+
+            if self.context['stop_type'] == StopType.HOME:
+                await answer(messages.getting_university_stop_first_letter)
+                return Branch(branches.show_tram_stops, stop_type=StopType.UNIVERSITY)
+
+            await answer(messages.resp_show_menu, keyboard=utils.general_keyboard())
+            return ExitBranch()
+
+        await answer(messages.stop_direction_choice, keyboard=utils.directions_keyboard(directions, one_time=True))
+
+        return Branch(branches.save_tram_stop_id, stop_type=self.context['stop_type'])
+
+    @rule_disposal(VBMLRule(handlers.choose_another_stop))
+    async def go_back(self, answer: Message):
+        await answer(messages.getting_home_stop_first_letter)
+        return Branch(branches.show_tram_stops, stop_type=self.context['stop_type'])
+
+
 @bp.branch.cls_branch(branches.save_tram_stop_id)
 class SaveTramStopIdBranch(ClsBranch, BaseTramBranchInterface):
     """Сохраняет идентификатор остановки
@@ -99,12 +134,11 @@ class SaveTramStopIdBranch(ClsBranch, BaseTramBranchInterface):
     async def branch(self, answer: Message, *args):
         """Вызывается, когда пользователь выбирает остановку"""
 
-        stop_name: str = answer.text
-        stop_type: StopType = self.context['stop_type']
+        if not answer.payload:
+            await answer("Выберите направление из списка кнопок")
 
-        if not Transport.stop_exists(stop_name):
-            await answer(messages.wrong_stop_name)
-            return
+        stop_id: int = int(answer.payload)
+        stop_type: StopType = self.context['stop_type']
 
         Transport.save_tram_stop_id(answer.peer_id, stop_id, stop_type)
 
@@ -114,5 +148,5 @@ class SaveTramStopIdBranch(ClsBranch, BaseTramBranchInterface):
             await answer(messages.getting_university_stop_first_letter)
             return Branch(branches.show_tram_stops, stop_type=StopType.UNIVERSITY)
 
-        await answer(messages.resp_show_menu, keyboard=general_keyboard())
+        await answer(messages.resp_show_menu, keyboard=utils.general_keyboard())
         return ExitBranch()

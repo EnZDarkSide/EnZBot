@@ -7,8 +7,6 @@ from .parser import TramParser
 from ..database.enitities.Transport import DBTransport
 from ..other import handlers
 
-parser = TramParser()
-
 
 class Transport:
     """API для доступа к расписанию трамваев"""
@@ -50,7 +48,7 @@ class Transport:
         else:
             stop_id: int = DBTransport.get_university_stop_id(user_id)
 
-        trams = parser.get_trams(stop_id)
+        trams = TramParser.get_trams(stop_id)
 
         # нужны только трамваи с номерами 14, 25 и 27
         return filter(lambda tram: tram.number in ('14', '25', '27'), trams)
@@ -59,7 +57,7 @@ class Transport:
     def get_stops(stop_first_letter: str) -> List[Stop]:
         """Возвращает остановки по первой букве"""
 
-        return parser.get_stops(stop_first_letter)
+        return TramParser.get_stops(stop_first_letter)
 
     @staticmethod
     def get_saved_stops(user_id: int) -> List[Union[str, None]]:
