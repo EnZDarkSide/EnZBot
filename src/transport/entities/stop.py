@@ -1,13 +1,9 @@
 from dataclasses import dataclass
-from typing import Union
+from typing import List, Tuple
 
 
 @dataclass
 class Stop:
-    id: int
     name: str
-    direction: Union[str, None]
-
-    @property
-    def title(self) -> str:
-        return f'{self.name} ' + (f'({self.direction})' if self.direction else '')
+    # [(123, 'direction name 1'), (124, 'direction name 2')]
+    directions: List[Tuple[int, str]]

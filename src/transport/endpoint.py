@@ -5,8 +5,7 @@ from vkbottle.branch import ClsBranch, ExitBranch, Branch
 from vkbottle.branch import rule_disposal
 from vkbottle.rule import VBMLRule
 
-from src.other import handlers, messages, branches
-from src.other.utils import trams_keyboard, general_keyboard
+from src.other import handlers, messages, branches, utils
 from src.transport import Transport
 from src.transport.entities.stop_type import StopType
 from src.transport.entities.tram import Tram
@@ -17,12 +16,11 @@ bp = Blueprint()
 @bp.on.message(text=[handlers.show_trams, handlers.show_trams_short])
 async def show_tram_menu(answer: Message):
     """Создаёт основное меню для травмаев"""
-    keyboard = trams_keyboard(user_id=answer.from_id, one_time=True)
 
     await answer(
         messages.endpoint_choice if Transport.stop_saved(answer.from_id) else messages.no_stop_saved,
-        keyboard=keyboard)
-
+        keyboard=utils.trams_keyboard(user_id=answer.from_id, one_time=True)
+    )
 
     return Branch(branches.trams_menu)
 
@@ -34,7 +32,7 @@ class BaseTramBranchInterface:
     async def exit_branch(self, answer: Message):
         """Выходит в основное меню"""
 
-        await answer(messages.resp_show_menu, keyboard=general_keyboard())
+        await answer(messages.resp_show_menu, keyboard=utils.general_keyboard())
         return ExitBranch()
 
 
@@ -47,16 +45,12 @@ class TramsMenuBranch(ClsBranch, BaseTramBranchInterface):
     async def show_trams(self, answer: Message):
         """Показывает расписание травмаев"""
 
-        if answer.text == handlers.show_home_tram_stops:
-            stop_type = StopType.HOME
-        else:
-            stop_type = StopType.UNIVERSITY
-
+        stop_type = StopType.HOME if answer.text == handlers.show_home_tram_stops else StopType.UNIVERSITY
         trams: Iterator[Tram] = Transport.get_trams(answer.peer_id, stop_type)
 
         await answer('\n'.join([
             f'{tram.number}: {tram.arrival_time} [{tram.arrival_distance}]' for tram in trams
-        ]) or messages.no_trams, keyboard=trams_keyboard(user_id=answer.from_id, one_time=True))
+        ]) or messages.no_trams, keyboard=utils.trams_keyboard(user_id=answer.from_id, one_time=True))
 
     @rule_disposal(VBMLRule(handlers.set_tram_stops, lower=True))
     async def start_stops_setup(self, answer: Message):
@@ -71,25 +65,26 @@ class ShowTramStopsBranch(ClsBranch, BaseTramBranchInterface):
     """Показывает доступные остановки по первой букве
 
     Получает на вход stop_type — HOME или UNIVERSITY —,
-    который передаёт на ветку, которая сохраняет идентификатор остановки.
+    чтобы передать на ветку, которая сохраняет идентификатор остановки.
     """
 
     async def branch(self, answer: Message, *args):
         """Вызывается, когда пользователь ввёл недопустимый символ или больше одного символа"""
 
         await answer(messages.no_stops_for_this_char if len(answer.text) == 1 else messages.one_char_only)
+        await answer(answer.payload)
 
     @rule_disposal(VBMLRule(handlers.regex_stop_first_letter, lower=True))
     async def show_stops(self, answer: Message):
         """Показывает остановки по введённой пользователем первой букве"""
 
-        await answer(msg := '\n'.join([
-            f'{stop.id}: {stop.title}' for stop in Transport.get_stops(stop_first_letter=answer.text)
-        ]) or messages.no_stops_for_this_char)
+        if not (stops := Transport.get_stops(stop_first_letter=answer.text)):
+            await answer(messages.no_stops_for_this_char)
+            return
 
-        if msg != messages.no_stops_for_this_char:
-            await answer(messages.stop_choice)
-            return Branch(branches.save_tram_stop_id, stop_type=self.context['stop_type'], send=answer)
+        await answer(messages.stop_name_choice, keyboard=utils.stops_keyboard(stops))
+
+        return Branch(branches.show_tram_directions, stop_type=self.context['stop_type'])
 
 
 @bp.branch.cls_branch(branches.save_tram_stop_id)
@@ -102,19 +97,13 @@ class SaveTramStopIdBranch(ClsBranch, BaseTramBranchInterface):
     """
 
     async def branch(self, answer: Message, *args):
-        """Вызывается, когда пользователь ввёл недопустимый идентификатор"""
+        """Вызывается, когда пользователь выбирает остановку"""
 
-        await answer(messages.wrong_stop_id)
-
-    @rule_disposal(VBMLRule(handlers.regex_stop_id, lower=True))
-    async def save_stop_id(self, answer: Message):
-        """Вызывается, когда пользователь вводит число"""
-
-        stop_id: int = int(answer.text)
+        stop_name: str = answer.text
         stop_type: StopType = self.context['stop_type']
 
-        if not Transport.stop_exists(stop_id):
-            await answer(messages.wrong_stop_id)
+        if not Transport.stop_exists(stop_name):
+            await answer(messages.wrong_stop_name)
             return
 
         Transport.save_tram_stop_id(answer.peer_id, stop_id, stop_type)
@@ -123,7 +112,7 @@ class SaveTramStopIdBranch(ClsBranch, BaseTramBranchInterface):
 
         if stop_type == StopType.HOME:
             await answer(messages.getting_university_stop_first_letter)
-            return Branch(branches.show_tram_stops, stop_type=StopType.UNIVERSITY, send=answer)
+            return Branch(branches.show_tram_stops, stop_type=StopType.UNIVERSITY)
 
         await answer(messages.resp_show_menu, keyboard=general_keyboard())
         return ExitBranch()

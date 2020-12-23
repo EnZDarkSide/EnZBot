@@ -48,7 +48,11 @@ class TramParser:
             stop_id = int(element.get('href').split('/')[-1])
             stop = pattern.fullmatch(element.text)
 
-            stops.append(Stop(stop_id, stop['name'], stop['direction']))
+            # все остановки должны быть остортированы
+            if not stops or stops[-1].name != stop['name']:
+                stops.append(Stop(stop['name'], []))
+
+            stops[-1].directions.append((stop_id, stop['direction']))
 
         return stops
 
