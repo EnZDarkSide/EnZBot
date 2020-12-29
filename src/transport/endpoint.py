@@ -85,7 +85,7 @@ class ShowTramStopsBranch(ClsBranch, BaseTramBranchInterface):
         await answer(
             messages.stop_name_choice,
             keyboard=keyboards.create_grouped_btns([(stop.name, {'directions': stop.directions}) for stop in stops],
-                                                   exit_btn=True)
+                                                   one_time=True, exit_btn=True)
         )
 
         return Branch(branches.show_tram_directions, stop_type=self.context['stop_type'])
