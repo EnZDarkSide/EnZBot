@@ -1,5 +1,5 @@
 import json
-from typing import Iterator, List, Tuple, Union
+from typing import Iterator, List, Tuple, Optional, Dict
 
 from vkbottle.bot import Message, Blueprint
 from vkbottle.branch import ClsBranch, ExitBranch, Branch
@@ -102,11 +102,11 @@ class ShowTramDirectionsBranch(ClsBranch, BaseTramBranchInterface):
             await answer("Выберите остановку из списка кнопок")
 
         # направления остановок с их идентификаторами
-        directions: List[Tuple[int, Union[str, None]]] = json.loads(answer.payload)
+        directions: List[Tuple[int, Optional[str]]] = payload['directions']
 
         if len(directions) == 1:
-            direction: Union[str, None] = directions[0][1]
-            stop_title: str = answer.text + (f'({direction})' if direction else '')
+            direction_name: Optional[str] = directions[0][1]
+            stop_title: str = answer.text + (f'({direction_name})' if direction_name else '')
             await answer(f'Вы выбрали {stop_title}')
 
             if self.context['stop_type'] == StopType.HOME:

@@ -1,4 +1,4 @@
-from typing import Iterator, Union, List
+from typing import Iterator, Union, List, Optional
 
 from src.transport.entities.stop_type import StopType
 from .entities.stop import Stop
@@ -60,7 +60,7 @@ class Transport:
         return TramParser.get_stops(stop_first_letter)
 
     @staticmethod
-    def get_saved_stops(user_id: int) -> List[Union[str, None]]:
+    def get_saved_stops(user_id: int) -> List[Optional[str]]:
         return [DBTransport.get_home_stop_id(user_id) and handlers.show_home_tram_stops,
                 DBTransport.get_university_stop_id(user_id) and handlers.show_university_tram_stops]
 

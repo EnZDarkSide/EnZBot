@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional
 
 from src.database.db import DB, cur
 
@@ -7,7 +7,7 @@ class DBTransport:
     r"""API для чтения из\записи в таблицу 'transport' БД"""
 
     @staticmethod
-    def get_home_stop_id(user_id: int) -> Union[int, None]:
+    def get_home_stop_id(user_id: int) -> Optional[int]:
         """Возвращает идентификатор остановки дома или None"""
 
         DB.exec_command(f'SELECT HomeStopId FROM transport WHERE UserId={user_id}', False)
@@ -24,7 +24,7 @@ class DBTransport:
         )
 
     @staticmethod
-    def get_university_stop_id(user_id: int) -> Union[int, None]:
+    def get_university_stop_id(user_id: int) -> Optional[int]:
         """Возвращает идентификатор остановки университета или None"""
 
         DB.exec_command(f'SELECT UniversityStopId FROM transport WHERE UserId={user_id}', False)
