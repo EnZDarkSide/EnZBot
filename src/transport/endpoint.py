@@ -57,7 +57,10 @@ class TramsMenuBranch(ClsBranch, BaseTramBranchInterface):
     async def start_stops_setup(self, answer: Message):
         """Запускает установление остановок"""
 
-        await answer(messages.getting_home_stop_first_letter)
+        await answer(
+            messages.getting_home_stop_first_letter,
+            keyboard=keyboards.create_extra_btns(back_btn=True, exit_btn=True)
+        )
         return Branch(branches.show_tram_stops, stop_type=StopType.HOME)
 
 
@@ -85,10 +88,14 @@ class ShowTramStopsBranch(ClsBranch, BaseTramBranchInterface):
         await answer(
             messages.stop_name_choice,
             keyboard=keyboards.create_grouped_btns([(stop.name, {'directions': stop.directions}) for stop in stops],
-                                                   one_time=True, exit_btn=True)
+                                                   one_time=True, back_btn=True, exit_btn=True)
         )
 
         return Branch(branches.show_tram_directions, stop_type=self.context['stop_type'])
+
+    @rule_disposal(VBMLRule(handlers.go_back))
+    async def go_back(self, answer: Message):
+        return await show_tram_menu(answer)
 
 
 @bp.branch.cls_branch(branches.show_tram_directions)
@@ -136,8 +143,12 @@ class ShowTramDirectionsBranch(ClsBranch, BaseTramBranchInterface):
 
     @rule_disposal(VBMLRule(handlers.go_back))
     async def go_back(self, answer: Message):
-        await answer(messages.getting_home_stop_first_letter)
-        return Branch(branches.show_tram_stops, stop_type=self.context['stop_type'])
+        if stop_type := self.context['stop_type'] == StopType.HOME:
+            await answer(messages.getting_home_stop_first_letter)
+        else:
+            await answer(messages.getting_university_stop_first_letter)
+
+        return Branch(branches.show_tram_stops, stop_type=stop_type)
 
 
 @bp.branch.cls_branch(branches.save_tram_stop_id)

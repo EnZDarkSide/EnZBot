@@ -4,7 +4,6 @@ from typing import Iterator, List, Tuple, Dict, Any
 from vkbottle import keyboard_gen
 
 from src.other import handlers, utils
-from src.other.utils import schedule_keyboard_obj
 from src.transport import Transport
 
 
@@ -41,15 +40,25 @@ def create_grouped_btns(btns: List[Tuple[str, Dict]], one_time: bool = False,
     grouped_btns = [
         [{'text': btn[0], 'payload': json.dumps(btn[1], ensure_ascii=False)} for btn in btns] for btns in rows
     ]
-    extra_btns = list(filter(None.__ne__, [
+
+    return create_keyboard(
+        *utils.filter_not_empty(*grouped_btns, _extra_btns(back_btn, exit_btn)),
+        one_time=one_time
+    )
+
+
+def create_extra_btns(back_btn: bool = False, exit_btn: bool = False, one_time: bool = False) -> str:
+    return create_keyboard(
+        *utils.filter_not_empty(_extra_btns(back_btn, exit_btn)),
+        one_time=one_time
+    )
+
+
+def _extra_btns(back_btn: bool = False, exit_btn: bool = False) -> List[Dict[str, str]]:
+    return list(filter(None.__ne__, [
         {'text': handlers.go_back, 'color': 'secondary'} if back_btn else None,
         {'text': handlers.exit_branch, 'color': 'secondary'} if exit_btn else None,
     ]))
-
-    return create_keyboard(
-        *utils.filter_not_empty(*grouped_btns, extra_btns),
-        one_time=one_time
-    )
 
 
 def main_menu() -> str:
@@ -57,14 +66,6 @@ def main_menu() -> str:
         [{'text': handlers.show_schedule}, {'text': handlers.open_portal}],
         [{'text': handlers.show_trams, 'color': 'secondary'}, {'text': handlers.change_group, 'color': 'secondary'}]
     )
-
-
-def schedule_keyboard() -> str:
-    buttons_arr = schedule_keyboard_obj()
-
-    return create_keyboard(*[[{'text': btn['btn_name'],
-                               'color': 'positive' if btn['btn_name'] == 'Сегодня' else btn['color']}
-                              for btn in split] for split in buttons_arr], [{'text': 'Назад', 'color': 'secondary'}])
 
 
 def portal_menu() -> str:
@@ -97,3 +98,11 @@ def address_menu() -> str:
 
 def range_menu(iterable: Iterator[Any]) -> str:
     return create_keyboard(*[[{'text': str(element)}] for element in iterable])
+
+
+def schedule() -> str:
+    buttons_arr = utils.schedule_keyboard_obj()
+
+    return create_keyboard(*[[{'text': btn['btn_name'],
+                               'color': 'positive' if btn['btn_name'] == 'Сегодня' else btn['color']}
+                              for btn in split] for split in buttons_arr], [{'text': 'Назад', 'color': 'secondary'}])

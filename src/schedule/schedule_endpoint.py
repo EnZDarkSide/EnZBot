@@ -14,7 +14,7 @@ bp = Blueprint()
 
 @bp.on.message(text=['Расписание', 'Р'])
 async def get_schedule(answer: Message):
-    await answer('На какой день показать расписание?', keyboard=src.other.keyboards.schedule_keyboard())
+    await answer('На какой день показать расписание?', keyboard=src.other.keyboards.schedule())
     return Branch('schedule_main')
 
 
@@ -32,12 +32,12 @@ class PortalBranch(ClsBranch):
 
             result = schedule.get_schedule(group, button['start_date'], button['end_date'])
             for r in result:
-                await answer(r, keyboard=src.other.keyboards.schedule_keyboard())
+                await answer(r, keyboard=src.other.keyboards.schedule())
         elif answer.text == 'debug':
             str = '\n'.join([f'{btn}: {btn["start_date"]}' for btn in buttons_dict])
-            await answer(f'{str}', keyboard=src.other.keyboards.schedule_keyboard())
+            await answer(f'{str}', keyboard=src.other.keyboards.schedule())
         else:
-            await answer("Шо? Нипонял (пасхалка найдена)", keyboard=src.other.keyboards.schedule_keyboard())
+            await answer("Шо? Нипонял (пасхалка найдена)", keyboard=src.other.keyboards.schedule())
 
     @rule_disposal(VBMLRule(["выйти", "назад"], lower=True))
     async def exit_branch(self, answer: Message):
