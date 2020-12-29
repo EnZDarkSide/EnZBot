@@ -57,6 +57,10 @@ def group_by_length(elms: Iterable[T], get_length: Callable[[T], int]) -> List[L
     return grouped
 
 
+def format_btn(btn: str) -> str:
+    return btn[:37].rstrip() + '...' if len(btn) > 40 else btn
+
+
 def filter_not_empty(*elms: Iterable[T]) -> Iterable[T]:
     return filter(lambda elm: bool(elm), elms)
 
