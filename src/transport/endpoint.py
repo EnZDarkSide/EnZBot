@@ -107,9 +107,15 @@ class ShowTramDirectionsBranch(ClsBranch, BaseTramBranchInterface):
         directions: List[Tuple[int, Optional[str]]] = payload['directions']
 
         if len(directions) == 1:
+            stop_id: int = directions[0][0]
             direction_name: Optional[str] = directions[0][1]
+            stop_type: StopType = self.context['stop_type']
+
             stop_title: str = answer.text + (f'({direction_name})' if direction_name else '')
             await answer(f'Вы выбрали {stop_title}')
+
+            Transport.save_tram_stop_id(answer.from_id, stop_id, stop_type)
+            await answer(messages.done)
 
             if self.context['stop_type'] == StopType.HOME:
                 await answer(messages.getting_university_stop_first_letter)
@@ -156,7 +162,6 @@ class SaveTramStopIdBranch(ClsBranch, BaseTramBranchInterface):
         stop_type: StopType = self.context['stop_type']
 
         Transport.save_tram_stop_id(answer.from_id, stop_id, stop_type)
-
         await answer(messages.done)
 
         if stop_type == StopType.HOME:
