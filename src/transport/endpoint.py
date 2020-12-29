@@ -111,7 +111,7 @@ class ShowTramDirectionsBranch(ClsBranch, BaseTramBranchInterface):
             direction_name: Optional[str] = directions[0][1]
             stop_type: StopType = self.context['stop_type']
 
-            stop_title: str = answer.text + (f'({direction_name})' if direction_name else '')
+            stop_title: str = answer.text + (f' ({direction_name})' if direction_name else '')
             await answer(f'Вы выбрали {stop_title}')
 
             Transport.save_tram_stop_id(answer.from_id, stop_id, stop_type)

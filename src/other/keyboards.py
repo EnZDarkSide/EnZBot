@@ -38,7 +38,9 @@ def create_grouped_btns(btns: List[Tuple[str, Dict]], one_time: bool = False,
 
     rows: List[List[Tuple[str, Dict]]] = utils.group_by_length(btns, lambda btn: len(btn[0]))
 
-    grouped_btns = [[{'text': btn[0], 'payload': json.dumps(btn[1], ensure_ascii=False)} for btn in btns] for btns in rows]
+    grouped_btns = [
+        [{'text': btn[0], 'payload': json.dumps(btn[1], ensure_ascii=False)} for btn in btns] for btns in rows
+    ]
     extra_btns = list(filter(None.__ne__, [
         {'text': handlers.go_back, 'color': 'secondary'} if back_btn else None,
         {'text': handlers.exit_branch, 'color': 'secondary'} if exit_btn else None,
