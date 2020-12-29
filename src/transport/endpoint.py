@@ -100,7 +100,9 @@ class ShowTramDirectionsBranch(ClsBranch, BaseTramBranchInterface):
 
         if not answer.payload:
             await answer("Выберите остановку из списка кнопок")
+            return
 
+        payload: Dict = json.loads(answer.payload)
         # направления остановок с их идентификаторами
         directions: List[Tuple[int, Optional[str]]] = payload['directions']
 
@@ -126,7 +128,7 @@ class ShowTramDirectionsBranch(ClsBranch, BaseTramBranchInterface):
 
         return Branch(branches.save_tram_stop_id, stop_type=self.context['stop_type'])
 
-    @rule_disposal(VBMLRule(handlers.choose_another_stop))
+    @rule_disposal(VBMLRule(handlers.go_back))
     async def go_back(self, answer: Message):
         await answer(messages.getting_home_stop_first_letter)
         return Branch(branches.show_tram_stops, stop_type=self.context['stop_type'])
@@ -146,11 +148,14 @@ class SaveTramStopIdBranch(ClsBranch, BaseTramBranchInterface):
 
         if not answer.payload:
             await answer("Выберите направление из списка кнопок")
+            return
 
-        stop_id: int = int(answer.payload)
+        payload: Dict = json.loads(answer.payload)
+
+        stop_id: int = int(payload['stop_id'])
         stop_type: StopType = self.context['stop_type']
 
-        Transport.save_tram_stop_id(answer.peer_id, stop_id, stop_type)
+        Transport.save_tram_stop_id(answer.from_id, stop_id, stop_type)
 
         await answer(messages.done)
 
