@@ -1,70 +1,39 @@
 import calendar
 import datetime
 import itertools
-import json
 import locale
-from typing import Iterator, List, Dict, Iterable, Any, Tuple, Union
+from typing import List, Iterable, Tuple, TypeVar, Callable
 
 import pendulum
-from vkbottle import keyboard_gen
 
 from src._date import get_week
-from src.other import handlers
-from src.transport import Transport
-from src.transport.entities.stop import Stop
 
 locale.setlocale(locale.LC_ALL, 'ru_RU.utf8')
 
+T = TypeVar('T')
 
-def _serialize_by_name_length(stops: Iterable[Stop]) -> Tuple[List[Stop], List[Stop], List[Stop]]:
-    """Разделяет элементы по треём категоримя, чтобы вывести по кнопкам"""
 
-    shorts: List[Stop] = []
-    mediums: List[Stop] = []
-    longs: List[Stop] = []
+def group_by_length(elms: Iterable[T], get_length: Callable[[T], int]) -> List[List[T]]:
+    """Разделяет элементы по группам из одной, двух или трёх элементов
 
-    for stop in stops:
-        if (length := len(stop.name)) <= 11:
-            shorts.append(stop)
+    Аргументы
+    elms — элементы в любом виде, завёрнутые в итерируемый тип
+    get_length — функция, принимающая на вход элемент аргумента elms
+                 и возвращающая длину элемента, по которой они группируются
+
+    Возвращает список групп; каждая группа — от одной до трёх элементов, в зависимости от длины
+    """
+
+    lsts: Tuple[List[T], List[T], List[T]] = [], [], []
+    grouped: List[List[T]] = []
+
+    for elm in elms:
+        if (length := get_length(elm)) <= 11:
+            lsts[0].append(elm)
         elif length <= 18:
-            mediums.append(stop)
+            lsts[1].append(elm)
         else:
-            longs.append(stop)
-
-    return shorts, mediums, longs
-
-
-def general_keyboard() -> str:
-    return create_keyboard([{"text": "Расписание"}, {"text": "Портал"}],
-                           [{"text": handlers.show_trams, 'color': 'secondary'},
-                            {"text": "Сменить группу", "color": "secondary"}])
-
-
-def range_menu(iterable: Iterator[Any]) -> str:
-    return create_keyboard(*[[{"text": str(element)}] for element in iterable])
-
-
-def trams_keyboard(user_id: int, one_time: bool = False) -> str:
-    saved_stops: Iterator[str] = filter(None.__ne__, Transport.get_saved_stops(user_id))
-
-    direction_btns = [
-        {'text': stop_name, 'color': 'positive', 'payload': [1, 2]} for stop_name in saved_stops
-    ]
-
-    action_btns = [
-        {'text': handlers.set_tram_stops, 'color': 'negative'},
-        {'text': handlers.exit_branch, 'color': 'secondary'}
-    ]
-
-    rows = filter(lambda btns: bool(btns), [direction_btns, action_btns])
-
-    return create_keyboard(*rows, one_time=one_time)
-
-
-def stops_keyboard(stops: List[Stop]) -> str:
-    # получаем три листа: короткие остановки, средние и длинные
-    lsts: Tuple[List[Stop], List[Stop], List[Stop]] = _serialize_by_name_length(stops)
-    rows: List[List[Dict[str, str]]] = []
+            lsts[2].append(elm)
 
     # проходится по всем трём листам
     for i in range(len(lsts)):
@@ -75,70 +44,21 @@ def stops_keyboard(stops: List[Stop]) -> str:
         # количество кнопок в ряд
         btns_count = 3 - i
 
-        # создаёт кнопки: короткие названия — 3 в ряд,
-        # средние — 2 в ряд и длинные — 1 название идёт в ряд
-        for stops in zip(*[lst_iter] * btns_count):
-            rows.append([{'text': stop.name, 'payload': stop.directions} for stop in stops])
+        # группирует элементы: короткие — 3 в группу,
+        # средние — 2 в группу и длинные — 1 элемент идёт в группу
+        grouped.extend([list(elms) for elms in zip(*[lst_iter] * btns_count)])
 
-        # если остаются кнопки
-        # — например, в листе кортких было 8, берётся два раза по 3, две остаются —
+        # если остаются элементы — например,
+        # в листе кортких было 8, берётся два раза по 3, два остаются —
         # добавить их в лист следующих по длине
         if left := len(lst) % btns_count:
             lsts[i + 1].extend(lst[-left:])
 
-    return create_keyboard(*rows, [{'text': handlers.exit_branch, 'color': 'secondary'}])
+    return grouped
 
 
-def _serialize_by_direction_length(directions: List[Tuple[int, str]]) -> Tuple[
-    List[Tuple[int, str]], List[Tuple[int, str]], List[Tuple[int, str]]]:
-    """Разделяет элементы по треём категоримя, чтобы вывести по кнопкам"""
-
-    shorts: List[Tuple[int, str]] = []
-    mediums: List[Tuple[int, str]] = []
-    longs: List[Tuple[int, str]] = []
-
-    for direction in directions:
-        if not direction[1]:
-            continue
-
-        if (length := len(direction[1])) <= 11:
-            shorts.append(direction)
-        elif length <= 18:
-            mediums.append(direction)
-        else:
-            longs.append(direction)
-
-    return shorts, mediums, longs
-
-
-def directions_keyboard(directions: List[Tuple[int, str]], one_time: bool = False):
-    # получаем три листа: короткие остановки, средние и длинные
-    lsts: Tuple[List[Tuple[int, str]], List[Tuple[int, str]], List[Tuple[int, str]]] = \
-        _serialize_by_direction_length(directions)
-    rows: List[List[Dict[str, str]]] = []
-
-    # проходится по всем трём листам
-    for i in range(len(lsts)):
-        lst = lsts[i]
-        # обе перменные нужны для функции zip: https://stackoverflow.com/a/5389547/9645340
-        # достать нужное количесвто элементов за раз
-        lst_iter = iter(lst)
-        # количество кнопок в ряд
-        btns_count = 3 - i
-
-        # создаёт кнопки: короткие названия — 3 в ряд,
-        # средние — 2 в ряд и длинные — 1 название идёт в ряд
-        for directions in zip(*[lst_iter] * btns_count):
-            rows.append([{'text': direction[1][:40], 'payload': json.dumps(direction[0])} for direction in directions])
-
-        # если остаются кнопки
-        # — например, в листе кортких было 8, берётся два раза по 3, две остаются —
-        # добавить их в лист следующих по длине
-        if left := len(lst) % btns_count:
-            lsts[i + 1].extend(lst[-left:])
-
-    return create_keyboard(*rows, [{'text': handlers.choose_another_stop, 'color': 'secondary'},
-                                   {'text': handlers.exit_branch, 'color': 'secondary'}], one_time=one_time)
+def filter_not_empty(*elms: Iterable[T]) -> Iterable[T]:
+    return filter(lambda elm: bool(elm), elms)
 
 
 def button(day_name, start_date, end_date=None, btn_name=None, color='primary'):
@@ -150,20 +70,6 @@ def button(day_name, start_date, end_date=None, btn_name=None, color='primary'):
 
     return {"start_date": start_date.strftime("%d.%m.%Y"), "end_date": end_date.strftime("%d.%m.%Y"),
             "day_name": day_name, "btn_name": btn_name, "color": color}
-
-
-def portal_keyboard():
-    return create_keyboard([{'text': 'Расписание заданий'}],
-                           [{'text': 'Сменить данные', "color": 'secondary'},
-                            {'text': 'Выйти', "color": 'secondary'}])
-
-
-def schedule_keyboard():
-    buttons_arr = schedule_keyboard_obj()
-
-    return create_keyboard(*[[{"text": btn['btn_name'],
-                               "color": 'positive' if btn['btn_name'] == 'Сегодня' else btn['color']}
-                              for btn in split] for split in buttons_arr], [{"text": 'Назад', "color": 'secondary'}])
 
 
 def schedule_keyboard_obj():
@@ -207,26 +113,3 @@ def get_schedule_buttons(add_today=False):
     print('/n'.join(_dict))
 
     return _dict
-
-
-def address_menu():
-    return create_keyboard([{"text": 'Назад'}])
-
-
-# noinspection PyShadowingNames
-def create_keyboard(*rows, one_time: bool = False, inline: bool = False):
-    keyboard = keyboard_gen(
-        [
-            [{"text": button["text"],
-              "color": button["color"] if "color" in button else "primary",
-              "payload": button["payload"] if "payload" in button else "",
-              "type": button["type"] if "type" in button else "text"} for button in row]
-            for row in rows
-        ],
-        one_time=one_time,
-        inline=inline
-    )
-    return keyboard
-
-
-kb_exit = create_keyboard([{'text': 'Выйти'}])

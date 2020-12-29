@@ -8,19 +8,18 @@ from vkbottle.rule import VBMLRule
 
 from src._date import tz
 from src.database.enitities.Portal import DBPortal
-from src.other import utils, messages
-from src.other.utils import general_keyboard, create_keyboard, portal_keyboard, schedule_keyboard
+from src.other import utils, messages, keyboards
 from src.portal.parser import try_login, format_tasks, PortalManager
 from src.portal.utils import portal_users
 
-kb_exit = create_keyboard([{'text': 'Выйти'}])
+kb_exit = keyboards.create_keyboard([{'text': 'Выйти'}])
 
 bp = Blueprint()
 
 
 @bp.on.message(text=['Портал', 'П'])
 async def portal(answer: Message):
-    await answer('Меню портала', keyboard=portal_keyboard())
+    await answer('Меню портала', keyboard=keyboards.portal_menu())
     return Branch('portal_menu')
 
 
@@ -34,7 +33,7 @@ class PortalBranch(ClsBranch):
 
     @rule_disposal(VBMLRule("расписание заданий", lower=True))
     async def subjects_tasks_branch(self, answer: Message):
-        await answer('Выберите день', keyboard=schedule_keyboard())
+        await answer('Выберите день', keyboard=keyboards.schedule_keyboard())
         return Branch('portal_tasks')
 
     @rule_disposal(VBMLRule("Сменить данные", lower=True))
@@ -44,7 +43,7 @@ class PortalBranch(ClsBranch):
 
     @rule_disposal(VBMLRule("выйти", lower=True))
     async def exit_branch(self, answer: Message):
-        await answer("Возвращаемся", keyboard=general_keyboard())
+        await answer("Возвращаемся", keyboard=keyboards.main_menu())
         return ExitBranch()
 
     async def branch(self, answer: Message, *args):
@@ -75,7 +74,7 @@ class PortalUserLogin(ClsBranch):
 
     @rule_disposal(VBMLRule("выйти", lower=True))
     async def exit_branch(self, answer: Message):
-        await answer("Возвращаемся", keyboard=portal_keyboard())
+        await answer("Возвращаемся", keyboard=keyboards.portal_menu())
         return Branch("portal_menu")
 
 
@@ -103,7 +102,7 @@ async def p_tasks_by_day(answer: Message):
     buttons_dict = utils.get_schedule_buttons(add_today=True)
 
     if answer.text not in buttons_dict.keys():
-        await answer('Воспользуйтесь клавиатурой для выбора даты', keyboard=schedule_keyboard())
+        await answer('Воспользуйтесь клавиатурой для выбора даты', keyboard=keyboards.schedule_keyboard())
         return
 
     button = buttons_dict[answer.text]
@@ -122,10 +121,10 @@ async def p_tasks_by_day(answer: Message):
         subj_w_tasks = [x for x in [{'subject': subject.name, 'tasks': subject.get_by_date_arr(dates)}
                                     for subject in subjects] if x['tasks']]
     except IndexError:
-        await answer('Раздел заданий для этого предмета не открыт', keyboard=schedule_keyboard())
+        await answer('Раздел заданий для этого предмета не открыт', keyboard=keyboards.schedule_keyboard())
 
     if not subj_w_tasks:
-        await answer(f'Заданий нет', keyboard=schedule_keyboard())
+        await answer(f'Заданий нет', keyboard=keyboards.schedule_keyboard())
         return
 
     for i, subj in enumerate(subj_w_tasks):
@@ -134,7 +133,7 @@ async def p_tasks_by_day(answer: Message):
         for task in subj['tasks']:
             await answer(task.to_str())
 
-    await answer(f'Это все задания', keyboard=schedule_keyboard())
+    await answer(f'Это все задания', keyboard=keyboards.schedule_keyboard())
 
 
 async def portal_tasks(answer: Message, subject_number: int):
@@ -155,7 +154,7 @@ async def portal_tasks(answer: Message, subject_number: int):
             await answer('У вас нет заданий для этого предмета', keyboard=kb_exit)
 
         for task in tasks:
-            await answer(task, keyboard=schedule_keyboard())
+            await answer(task, keyboard=keyboards.schedule_keyboard())
 
     except IndexError:
         await answer('Раздел заданий для этого предмета не открыт', keyboard=kb_exit)
@@ -173,7 +172,7 @@ async def portal_data_update(answer: Message, login, password):
                      ' Попробуйте снова', kb_exit)
         return False
 
-    await answer(messages.done, keyboard=schedule_keyboard())
+    await answer(messages.done, keyboard=keyboards.schedule_keyboard())
     await get_portal_for_user(answer)
     return True
 

@@ -4,8 +4,7 @@ from vkbottle.branch import Branch
 
 from src.bot import bot
 from src.database.enitities import DBGroups
-from src.other import messages
-from src.other.utils import general_keyboard
+from src.other import messages, keyboards
 
 
 # приветствие
@@ -25,7 +24,7 @@ async def send_menu(answer: Message):
         await answer('Чтобы продолжить, вам нужно вписать группу для расписания')
         return Branch('groups_update')
 
-    await answer(message=messages.resp_show_menu, keyboard=general_keyboard())
+    await answer(message=messages.resp_show_menu, keyboard=keyboards.main_menu())
 
 
 if __name__ == '__main__':

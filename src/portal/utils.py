@@ -1,6 +1,6 @@
 from expiringdict import ExpiringDict
 
-from src.other.utils import create_keyboard
+from src.other.keyboards import create_keyboard
 
 portal_users = ExpiringDict(max_len=10000, max_age_seconds=300)
 

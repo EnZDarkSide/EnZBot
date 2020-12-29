@@ -5,15 +5,14 @@ from vkbottle.rule import VBMLRule
 
 import src.database.enitities
 import src.database.enitities
-from src.other import messages
-from src.other.utils import general_keyboard, range_menu, create_keyboard
+from src.other import messages, keyboards
 from src.schedule import ScheduleManager
 
 schedule = ScheduleManager().schedules["УрГЭУ"]
 
 bp = Blueprint()
 
-kb_exit = create_keyboard([{'text': 'Выйти'}])
+kb_exit = keyboards.create_keyboard([{'text': 'Выйти'}])
 
 
 @bp.on.message(text=['Начать'])
@@ -24,7 +23,7 @@ async def send_greetings(answer: Message):
         await answer('Чтобы продолжить, вам нужно вписать группу для расписания')
         return Branch('groups_update')
 
-    await answer('Вы уже вписали свою группу', keyboard=general_keyboard())
+    await answer('Вы уже вписали свою группу', keyboard=keyboards.main_menu())
 
 
 @bp.on.message(text=['Сменить группу'])
@@ -40,7 +39,7 @@ class GroupsUpdate(ClsBranch):
 
     @rule_disposal(VBMLRule(["выйти", "назад"], lower=True))
     async def exit_branch(self, answer: Message):
-        await answer("Возвращаемся", keyboard=general_keyboard())
+        await answer("Возвращаемся", keyboard=keyboards.main_menu())
         return ExitBranch()
 
 
@@ -60,8 +59,8 @@ async def update_group(answer: Message):
         await answer("Похоже, группы с таким именем не существует.")
         if len(similar_groups) > 0:
             await answer("Возможно, вы имели в виду что-то из этого: \n",
-                         keyboard=range_menu([x[0] for x in similar_groups]))
+                         keyboard=keyboards.range_menu([x[0] for x in similar_groups]))
         return
 
-    await answer(messages.done, keyboard=general_keyboard())
+    await answer(messages.done, keyboard=keyboards.main_menu())
     await bp.branch.exit(answer.peer_id)

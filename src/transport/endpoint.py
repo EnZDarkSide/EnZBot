@@ -6,7 +6,7 @@ from vkbottle.branch import ClsBranch, ExitBranch, Branch
 from vkbottle.branch import rule_disposal
 from vkbottle.rule import VBMLRule
 
-from src.other import handlers, messages, branches, utils
+from src.other import handlers, messages, branches, keyboards
 from src.transport import Transport
 from src.transport.entities.stop_type import StopType
 from src.transport.entities.tram import Tram
@@ -20,7 +20,7 @@ async def show_tram_menu(answer: Message):
 
     await answer(
         messages.endpoint_choice if Transport.stop_saved(answer.from_id) else messages.no_stop_saved,
-        keyboard=utils.trams_keyboard(user_id=answer.from_id, one_time=True)
+        keyboard=keyboards.trams_menu(user_id=answer.from_id, one_time=True)
     )
 
     return Branch(branches.trams_menu)
@@ -33,7 +33,7 @@ class BaseTramBranchInterface:
     async def exit_branch(self, answer: Message):
         """Выходит в основное меню"""
 
-        await answer(messages.resp_show_menu, keyboard=utils.general_keyboard())
+        await answer(messages.resp_show_menu, keyboard=keyboards.main_menu())
         return ExitBranch()
 
 
@@ -51,7 +51,7 @@ class TramsMenuBranch(ClsBranch, BaseTramBranchInterface):
 
         await answer('\n'.join([
             f'{tram.number}: {tram.arrival_time} [{tram.arrival_distance}]' for tram in trams
-        ]) or messages.no_trams, keyboard=utils.trams_keyboard(user_id=answer.from_id, one_time=True))
+        ]) or messages.no_trams, keyboard=keyboards.trams_menu(user_id=answer.from_id, one_time=True))
 
     @rule_disposal(VBMLRule(handlers.set_tram_stops, lower=True))
     async def start_stops_setup(self, answer: Message):
@@ -82,7 +82,11 @@ class ShowTramStopsBranch(ClsBranch, BaseTramBranchInterface):
             await answer(messages.no_stops_for_this_char)
             return
 
-        await answer(messages.stop_name_choice, keyboard=utils.stops_keyboard(stops))
+        await answer(
+            messages.stop_name_choice,
+            keyboard=keyboards.create_grouped_btns([(stop.name, {'directions': stop.directions}) for stop in stops],
+                                                   exit_btn=True)
+        )
 
         return Branch(branches.show_tram_directions, stop_type=self.context['stop_type'])
 
@@ -109,10 +113,16 @@ class ShowTramDirectionsBranch(ClsBranch, BaseTramBranchInterface):
                 await answer(messages.getting_university_stop_first_letter)
                 return Branch(branches.show_tram_stops, stop_type=StopType.UNIVERSITY)
 
-            await answer(messages.resp_show_menu, keyboard=utils.general_keyboard())
+            await answer(messages.resp_show_menu, keyboard=keyboards.main_menu())
             return ExitBranch()
 
-        await answer(messages.stop_direction_choice, keyboard=utils.directions_keyboard(directions, one_time=True))
+        await answer(
+            messages.stop_direction_choice,
+            keyboard=keyboards.create_grouped_btns(
+                [(direction[1] or messages.no_direction, {'stop_id': direction[0]}) for direction in directions],
+                one_time=True
+            )
+        )
 
         return Branch(branches.save_tram_stop_id, stop_type=self.context['stop_type'])
 
@@ -148,5 +158,5 @@ class SaveTramStopIdBranch(ClsBranch, BaseTramBranchInterface):
             await answer(messages.getting_university_stop_first_letter)
             return Branch(branches.show_tram_stops, stop_type=StopType.UNIVERSITY)
 
-        await answer(messages.resp_show_menu, keyboard=utils.general_keyboard())
+        await answer(messages.resp_show_menu, keyboard=keyboards.main_menu())
         return ExitBranch()
