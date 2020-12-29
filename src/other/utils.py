@@ -28,9 +28,9 @@ def group_by_length(elms: Iterable[T], get_length: Callable[[T], int]) -> List[L
     grouped: List[List[T]] = []
 
     for elm in elms:
-        if (length := get_length(elm)) <= 11:
+        if (length := get_length(elm)) < 11:
             lsts[0].append(elm)
-        elif length <= 18:
+        elif length < 18:
             lsts[1].append(elm)
         else:
             lsts[2].append(elm)
