@@ -1,4 +1,4 @@
-from tortoise.fields import *
+from tortoise.fields import IntField, CharField
 from tortoise.models import Model
 
 
