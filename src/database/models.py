@@ -1,4 +1,4 @@
-from tortoise import fields
+from tortoise.fields import *
 from tortoise.models import Model
 
 
@@ -10,10 +10,10 @@ and context as string (as big as possible) to store context json
 
 
 class UserState(Model):
-    id = fields.IntField(pk=True)  # Primary key is often recommended
-    uid = fields.IntField()
-    branch = fields.CharField(20)
-    context = fields.CharField(255)
+    id = IntField(pk=True)  # Primary key is often recommended
+    uid = IntField()
+    branch = CharField(20)
+    context = CharField(255)
 
     class Meta:
         database = "user_state"
