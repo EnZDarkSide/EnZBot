@@ -6,12 +6,14 @@ from vkbottle.branch import ClsBranch, Branch, rule_disposal, ExitBranch
 from vkbottle.rule import VBMLRule
 
 from src import messages
+from src.database.save_branch import MySqlBranch
 from src.schedule import ScheduleManager
 from src.utils import general_keyboard, range_menu, create_keyboard
 
 schedule = ScheduleManager().schedules["УрГЭУ"]
 
 bp = Blueprint()
+bp.branch = MySqlBranch()
 
 kb_exit = create_keyboard([{'text': 'Выйти'}])
 
@@ -33,7 +35,6 @@ async def change_group(answer: Message):
     return Branch('groups_update')
 
 
-@bp.branch.cls_branch("groups_update")
 class GroupsUpdate(ClsBranch):
     async def branch(self, answer: Message, *args):
         await update_group(answer)
@@ -65,3 +66,5 @@ async def update_group(answer: Message):
 
     await answer(messages.done, keyboard=general_keyboard())
     await bp.branch.exit(answer.peer_id)
+
+bp.branch.add_branch(GroupsUpdate, "groups_update")

@@ -9,6 +9,7 @@ from vkbottle.rule import VBMLRule
 
 from src import messages, utils
 from src.database.enitities.Portal import DBPortal
+from src.database.save_branch import MySqlBranch
 from src.portal.parser import try_login, format_tasks, PortalManager
 from src.portal.utils import portal_users
 from src.utils import general_keyboard, create_keyboard, portal_keyboard, schedule_keyboard, get_schedule_buttons
@@ -18,15 +19,13 @@ from src._date import tz
 kb_exit = create_keyboard([{'text': 'Выйти'}])
 
 bp = Blueprint()
-
+bp.branch = MySqlBranch()
 
 @bp.on.message(text=['Портал', 'П'])
 async def portal(answer: Message):
     await answer('Меню портала', keyboard=portal_keyboard())
     return Branch('portal_menu')
 
-
-@bp.branch.cls_branch("portal_menu")
 class PortalBranch(ClsBranch):
     # @rule_disposal(VBMLRule("предметы", lower=True))
     # async def subjects_tasks_branch(self, answer: Message):
@@ -53,7 +52,6 @@ class PortalBranch(ClsBranch):
         await portal(answer)
 
 
-@bp.branch.cls_branch("portal_tasks")
 class PortalTasks(ClsBranch):
     async def branch(self, answer: Message, *args):
         return await p_tasks_by_day(answer)
@@ -64,7 +62,6 @@ class PortalTasks(ClsBranch):
         return Branch('portal_menu')
 
 
-@bp.branch.cls_branch("portal_login")
 class PortalUserLogin(ClsBranch):
     async def branch(self, answer: Message, *args):
         await answer('Ваших учетных данных нет в базе. Введите логин и пароль от портала,'
@@ -209,3 +206,7 @@ async def update_portal_data(answer: Message):
     await answer(f'Похоже, вам нужно указать данные для входа в портал.'
                  f'Для этого введите через пробел логин и пароль от портала', keyboard=kb_exit)
     await bp.branch.add(answer.peer_id, 'portal_login')
+
+bp.branch.add_branch(PortalBranch, "portal_menu")
+bp.branch.add_branch(PortalTasks, "portal_tasks")
+bp.branch.add_branch(PortalUserLogin, "portal_login")

@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+import os
+
+from tortoise import Tortoise
 from vkbottle import Message
 from vkbottle.branch import Branch
 
@@ -35,5 +38,11 @@ async def rand_message(answer: Message):
     await answer("Вызываем меню", keyboard=general_keyboard())
 
 
+async def init_db():
+    await Tortoise.init(
+        db_url=os.environ['CLEARDB_DATABASE_URL_WOREC'], modules={"models": ["src.database.models"]}
+    )
+    await Tortoise.generate_schemas(safe=True)
+
 if __name__ == '__main__':
-    bot.run_polling()
+    bot.run_polling(on_startup=init_db)

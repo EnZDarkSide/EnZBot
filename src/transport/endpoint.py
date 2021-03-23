@@ -3,11 +3,12 @@ from vkbottle.branch import ClsBranch, ExitBranch, Branch
 from vkbottle.branch import rule_disposal
 from vkbottle.rule import VBMLRule
 
+from src.database.save_branch import MySqlBranch
 from src.transport import Transport
 from src.utils import trams_keyboard, general_keyboard
 
 bp = Blueprint()
-
+bp.branch = MySqlBranch()
 
 @bp.on.message(text=['Где трамваи?', 'Т'])
 async def portal(answer: Message):
@@ -15,7 +16,6 @@ async def portal(answer: Message):
     return Branch('trams_menu')
 
 
-@bp.branch.cls_branch("trams_menu")
 class PortalBranch(ClsBranch):
 
     @rule_disposal(VBMLRule("От Умельцев до УрГЭУ", lower=True))
@@ -52,3 +52,6 @@ class PortalBranch(ClsBranch):
     async def exit_branch(self, answer: Message):
         await answer("Возвращаемся", keyboard=general_keyboard())
         return ExitBranch()
+
+
+bp.branch.add_branch(PortalBranch, "trams_menu")

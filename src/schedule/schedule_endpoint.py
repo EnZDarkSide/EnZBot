@@ -4,12 +4,14 @@ from vkbottle.framework.framework.rule import VBMLRule
 
 from src import utils
 from src.database.enitities.Groups import DBGroups
+from src.database.save_branch import MySqlBranch
 from src.schedule import ScheduleManager
 from src.utils import general_keyboard
 
 schedule = ScheduleManager().schedules['УрГЭУ']
 
 bp = Blueprint()
+bp.branch = MySqlBranch()
 
 
 @bp.on.message(text=['Расписание', 'Р'])
@@ -18,7 +20,6 @@ async def get_schedule(answer: Message):
     return Branch('schedule_main')
 
 
-@bp.branch.cls_branch("schedule_main")
 class PortalBranch(ClsBranch):
     async def branch(self, answer: Message, *args):
         request = DBGroups.get(answer.from_id)
@@ -43,3 +44,6 @@ class PortalBranch(ClsBranch):
     async def exit_branch(self, answer: Message):
         await answer('Возвращаемся', keyboard=general_keyboard())
         return ExitBranch()
+
+
+bp.branch.add_branch(PortalBranch, "schedule_main")
