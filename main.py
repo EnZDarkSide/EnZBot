@@ -45,4 +45,4 @@ async def init_db():
     await Tortoise.generate_schemas(safe=True)
 
 if __name__ == '__main__':
-    bot.run_polling(on_startup=init_db)
+    bot.run_polling(on_startup=init_db, skip_updates=False)
